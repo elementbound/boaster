@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "include/buffer.h"
+#include "include/boaster/boaster.h"
 
 int main() {
     const char *data = "Hello world!";
