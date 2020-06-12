@@ -35,4 +35,7 @@ void boaster_buffer_push_bytes(boaster_buffer_t* buffer, const void* bytes,
 #define boaster_buffer_get_at_offset(buffer, type, offset) \
     *(type*)(buffer->data + offset)
 
+#define boaster_buffer_see_index(buffer, type, index) \
+    (type*)(buffer->data + (index * sizeof(type)))
+
 #endif  // BOASTER_BUFFER_H_
