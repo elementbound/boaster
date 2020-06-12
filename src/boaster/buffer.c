@@ -34,6 +34,7 @@ boaster_buffer_t *boaster_buffer_create() {
 }
 
 void boaster_buffer_destroy(boaster_buffer_t *buffer) {
+    free(buffer->data);
     free(buffer);
 }
 
