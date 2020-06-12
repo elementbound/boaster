@@ -5,7 +5,7 @@
 #include "./types/pixel.h"
 #include "./types/shaders.h"
 #include "./image.h"
-#include "include/buffer.h"
+#include "./buffer.h"
 
 #ifndef boaster_byte_t
     #define byte_t unsigned char
@@ -16,7 +16,7 @@ typedef struct {
     boaster_pixel_shader_t pixel_shader;
 
     void* uniform_data;
-    buffer_t* vertex_buffer;
+    boaster_buffer_t* vertex_buffer;
     boaster_image_t* target_image;
 } boaster_draw_call_t;
 

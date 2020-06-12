@@ -1,4 +1,4 @@
-#include "include/buffer.h"
+#include "include/boaster/buffer.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,8 +21,9 @@ size_t __default_capacity_strategy(size_t requested, size_t size, \
     return result;
 }
 
-buffer_t *buffer_create() {
-    buffer_t *result = (buffer_t*) malloc(sizeof(buffer_t));
+boaster_buffer_t *boaster_buffer_create() {
+    boaster_buffer_t *result =
+        (boaster_buffer_t*) malloc(sizeof(boaster_buffer_t));
 
     result->__capacity_strategy = __default_capacity_strategy;
     result->__capacity = 0;
@@ -32,11 +33,11 @@ buffer_t *buffer_create() {
     return result;
 }
 
-void buffer_destroy(buffer_t *buffer) {
+void boaster_buffer_destroy(boaster_buffer_t *buffer) {
     free(buffer);
 }
 
-void buffer_ensure_capacity(buffer_t *buffer, size_t capacity) {
+void boaster_buffer_ensure_capacity(boaster_buffer_t *buffer, size_t capacity) {
     if (buffer->__capacity >= capacity)
         return;
 
@@ -47,10 +48,10 @@ void buffer_ensure_capacity(buffer_t *buffer, size_t capacity) {
     buffer->__capacity = new_capacity;
 }
 
-void buffer_push_bytes(buffer_t* buffer, \
+void boaster_buffer_push_bytes(boaster_buffer_t* buffer, \
     const void* bytes, size_t bytes_count) {
 
-    buffer_ensure_capacity(buffer, buffer->__size + bytes_count);
+    boaster_buffer_ensure_capacity(buffer, buffer->__size + bytes_count);
 
     memcpy(buffer->data + buffer->__size, bytes, bytes_count);
     buffer->__size += bytes_count;
