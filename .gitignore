@@ -92,3 +92,6 @@ tags
 # End of https://www.toptal.com/developers/gitignore/api/c,vim,visualstudiocode
 
 out/
+
+tags
+tags.lock
