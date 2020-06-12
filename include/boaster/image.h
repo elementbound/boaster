@@ -1,7 +1,10 @@
 #ifndef BOASTER_IMAGE_H_
 #define BOASTER_IMAGE_H_
 
+#include <stddef.h>  // size_t
+
 typedef struct {
+    size_t __pixel_size;
     size_t width;
     size_t height;
     void* data;
