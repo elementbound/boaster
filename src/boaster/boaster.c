@@ -1,11 +1,12 @@
 #include <assert.h>
+#include <math.h>
 #include "include/boaster/boaster.h"
 #include "include/boaster/buffer.h"
 
 void boaster_run_vertex_shader(boaster_buffer_t *vertex_buffer,
     boaster_vertex_shader_t vertex_shader,
-    void* uniform_data,
-    boaster_buffer_t* out) {
+    void *uniform_data,
+    boaster_buffer_t *out) {
 
     size_t vertex_count = vertex_buffer->__size / sizeof(boaster_vertex_t);
 
@@ -20,7 +21,11 @@ void boaster_run_vertex_shader(boaster_buffer_t *vertex_buffer,
     }
 }
 
-void boaster_fill_triangle(boaster_vertex_t *vertices, boaster_image_t *image) {
+void boaster_fill_triangle(boaster_vertex_t *vertices, boaster_image_t *image,
+    void *custom_data, boaster_pixel_callback_t callback) {
+
+    float barycentrics[] = { 0, 0, 0 };
+
     // Thanks Black Pawn!
     // https://blackpawn.com/texts/pointinpoly/default.html
     float Ax = vertices[0].position[0];
@@ -61,35 +66,54 @@ void boaster_fill_triangle(boaster_vertex_t *vertices, boaster_image_t *image) {
             float dot12 = v1x * v2x + v1y * v2y + v1z * v2z;
 
             float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+            barycentrics[0] = (dot11 * dot02 - dot01 * dot12) * invDenom;
+            barycentrics[1] = (dot00 * dot12 - dot01 * dot02) * invDenom;
+            barycentrics[2] = 1.0f - barycentrics[0] - barycentrics[1];
 
-            boaster_pixel_t* pixel =
-                (boaster_pixel_t*) boaster_image_get_pixel(image, x, y);
+            if(isgreaterequal(barycentrics[0], 0.0)
+                && isgreaterequal(barycentrics[1], 0.0)
+                && isless(barycentrics[0] + barycentrics[1], 1.005)) {
+                boaster_pixel_t* pixel =
+                    (boaster_pixel_t*) boaster_image_get_pixel(image, x, y);
 
-            if(u >= 0.f && v >= 0.f && u + v < 1.f) {
-                pixel->color[0] = 1.f;
-                pixel->color[1] = 1.f;
-                pixel->color[2] = 1.f;
-                pixel->color[3] = 1.f;
-            } else {
-                pixel->color[0] = 0.f;
-                pixel->color[1] = 0.f;
-                pixel->color[2] = 0.f;
-                pixel->color[3] = 1.f;
+                callback(vertices, x, y, barycentrics, pixel, custom_data);
             }
         }
     }
 }
 
+void pixel_callback(boaster_vertex_t* vertices,
+    size_t x, size_t y,
+    float barycentrics[3],
+    boaster_pixel_t* pixel,
+    void *custom_data) {
+
+    pixel->color[0] = 1;
+    pixel->color[1] = 1;
+    pixel->color[2] = 1;
+    pixel->color[3] = 1;
+
+    boaster_draw_call_t* draw_call =
+        (boaster_draw_call_t*) custom_data;
+
+    draw_call->pixel_shader(vertices, barycentrics, pixel,
+        draw_call->uniform_data);
+}
+
 void boaster_render(boaster_draw_call_t draw_call) {
-    assert(draw_call.vertex_buffer != 0);
-    assert(draw_call.vertex_shader != 0);
+    assert(draw_call.vertex_buffer != NULL);
+    assert(draw_call.vertex_shader != NULL);
 
     // Extract fields
     boaster_buffer_t* vertex_buffer = draw_call.vertex_buffer;
     boaster_vertex_shader_t vertex_shader = draw_call.vertex_shader;
+    boaster_pixel_shader_t pixel_shader = draw_call.pixel_shader;
     void* uniform_data = draw_call.uniform_data;
+    boaster_image_t* image = draw_call.target_image;
+
+    // Vertices must come in multiples of three, forming triangles
+    size_t vertex_count = vertex_buffer->__size / sizeof(boaster_vertex_t);
+    assert(vertex_count % 3 == 0);
 
     // Allocate memory for vertex shader output
     boaster_buffer_t *vertex_out = boaster_buffer_create();
@@ -97,6 +121,15 @@ void boaster_render(boaster_draw_call_t draw_call) {
 
     boaster_run_vertex_shader(vertex_buffer, vertex_shader, uniform_data,
         vertex_out);
+
+    // Rasterize output triangles
+    for (size_t i = 0; i < vertex_count; i += 3) {
+        boaster_vertex_t *vertices =
+            boaster_buffer_see_index(vertex_out, boaster_vertex_t, i);
+
+        boaster_fill_triangle(vertices, image, (void*) &draw_call,
+            pixel_callback);
+    }
 
     // Cleanup
     boaster_buffer_destroy(vertex_out);

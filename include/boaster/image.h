@@ -12,6 +12,8 @@ typedef struct {
 
 boaster_image_t *boaster_image_create(size_t width, size_t height);
 void* boaster_image_get_pixel(boaster_image_t* image, size_t x, size_t y);
+void boaster_image_fill(boaster_image_t* image, void* pixel_bytes,
+    size_t pixel_size);
 void boaster_image_destroy(boaster_image_t *image);
 
 #endif  // BOASTER_IMAGE_H_
