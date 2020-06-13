@@ -3,6 +3,9 @@ INCLUDE = -I.
 build: compile
 	$(CC) $(INCLUDE) \
 		out/bin/boaster/buffer.o \
+		out/bin/boaster/image.o \
+		out/bin/boaster/boaster.o \
+		-lm \
 		src/main.c -o out/main
 
 test: compile test.buffer test.image test.vertex_shader

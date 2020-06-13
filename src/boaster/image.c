@@ -19,7 +19,7 @@ void* boaster_image_get_pixel(boaster_image_t* image, size_t x, size_t y) {
     assert(x < image->width);
     assert(y < image->height);
 
-    return image->data + (y * image->height + x) * image->__pixel_size;
+    return image->data + ((y * image->width) + x) * image->__pixel_size;
 }
 
 void boaster_image_destroy(boaster_image_t *image) {
