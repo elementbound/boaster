@@ -9,9 +9,8 @@ typedef void (*boaster_pixel_callback_t)(boaster_vertex_t* vertices,
     boaster_pixel_t *pixel,
     void *custom_data);
 
-void boaster_run_vertex_shader(boaster_buffer_t *vertex_buffer,
-    boaster_vertex_shader_t vertex_shader,
-    void* uniform_data,
+void boaster_run_vertex_shader(boaster_draw_call_t draw_call,
+    size_t vertex_count,
     boaster_buffer_t *out);
 
 void boaster_fill_triangle(boaster_vertex_t *vertices, boaster_image_t *image,

@@ -7,7 +7,9 @@ typedef struct {
     float offset[4];
 } test_uniforms_t;
 
-void test_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms) {
+void test_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms,
+    boaster_vertex_format_t *in_format,
+    boaster_vertex_format_t *out_format) {
     boaster_vertex_t *in_vertex = (boaster_vertex_t*) v_vertex;
     boaster_vertex_t *out_vertex = (boaster_vertex_t*) v_out;
     test_uniforms_t *uniforms = (test_uniforms_t*) v_uniforms;
@@ -28,6 +30,8 @@ int main() {
         .offset = { 1.f, 2.f, 3.f, 1.f }
     };
 
+    const size_t vertex_count = 3;
+
     boaster_vertex_t vertices[] = {
         { .position = { 0.f, 1.f, 2.f, 0.f }, .color = { 1.f, 0.f, 0.f, 1.f } },
         { .position = { 2.f, 3.f, 4.f, 0.f }, .color = { 0.f, 1.f, 0.f, 1.f } },
@@ -40,11 +44,26 @@ int main() {
         { .position = { 9.f, 3.f, 10.f, 1.f }, .color = { 0.f, 1.f, 0.f, 1.f } }
     };
 
+    boaster_buffer_t *vertex_buffer = boaster_buffer_create();
+    boaster_buffer_push_bytes(vertex_buffer, vertices, sizeof(vertices));
+
+    boaster_vertex_format_t format;
+    boaster_vertex_format_init(&format);
+    boaster_vertex_format_add_property(&format, "position", sizeof(float), 4,
+        offsetof(boaster_vertex_t, position));
+    boaster_vertex_format_add_property(&format, "color", sizeof(float), 4,
+        offsetof(boaster_vertex_t, color));
+
+    boaster_draw_call_t draw_call = {
+        .vertex_shader = test_vertex_shader,
+        .uniform_data = &uniforms,
+        .vertex_buffer = vertex_buffer,
+        .input_format = &format,
+        .transform_format = &format
+    };
+
     test("Vertex shader should run for all vertices",
         // Given
-        boaster_buffer_t *vertex_buffer = boaster_buffer_create();
-        boaster_buffer_push_bytes(vertex_buffer, vertices, sizeof(vertices));
-
         boaster_buffer_t *expected = boaster_buffer_create();
         boaster_buffer_push_bytes(expected, expected_vertices,
             sizeof(expected_vertices));
@@ -53,8 +72,7 @@ int main() {
         boaster_buffer_ensure_capacity(actual, vertex_buffer->__capacity);
 
         // When
-        boaster_run_vertex_shader(vertex_buffer, test_vertex_shader, &uniforms,
-            actual);
+        boaster_run_vertex_shader(draw_call, vertex_count, actual);
 
         // Then
         test_assert(memcmp(actual->data, expected->data, expected->__size) == 0,

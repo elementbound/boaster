@@ -8,7 +8,9 @@ void clear_screen() {
     printf("\e[1;1H\e[2J");
 }
 
-void pass_through_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms) {
+void pass_through_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms,
+    boaster_vertex_format_t *in_format,
+    boaster_vertex_format_t *out_format) {
     boaster_vertex_t *in_vertex = (boaster_vertex_t*) v_vertex;
     boaster_vertex_t *out_vertex = (boaster_vertex_t*) v_out;
     float step = *(float*)v_uniforms;
@@ -70,7 +72,7 @@ void pixel_shader(void *v_vertices, float barycentrics[3],
     float Py = Ay + barycentrics[0] * v0y + barycentrics[1] * v1y;
     float Pz = Az + barycentrics[0] * v0z + barycentrics[1] * v1z;
 
-    float value = 0.2 + 0.8 * Py * Px;
+    float value = 0.05 + 0.95 * Px * Py;
     // value = 0.2 + 0.8 * f;
 
     out->color[0] = value * 255;
@@ -112,6 +114,13 @@ int main() {
         { .position = { 0.8, 0.8, 0.0, 0.f }, .color = { 0.f, 1.f, 0.f, 1.f } },
     };
 
+    boaster_vertex_format_t format;
+    boaster_vertex_format_init(&format);
+    boaster_vertex_format_add_property(&format, "position", sizeof(float), 4,
+        offsetof(boaster_vertex_t, position));
+    boaster_vertex_format_add_property(&format, "color", sizeof(float), 4,
+        offsetof(boaster_vertex_t, color));
+
     boaster_buffer_t* vertex_buffer = boaster_buffer_create();
     boaster_buffer_push_bytes(vertex_buffer, triangle_vertices,
         sizeof(triangle_vertices));
@@ -122,6 +131,8 @@ int main() {
 
     boaster_draw_call_t draw_call = {
         .vertex_shader = pass_through_vertex_shader,
+        .input_format = &format,
+        .transform_format = &format,
         .pixel_shader = pixel_shader,
         .vertex_buffer = vertex_buffer,
         .target_image = image
