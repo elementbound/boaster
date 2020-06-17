@@ -11,7 +11,7 @@ void boaster_varray_remove_bytes(void **data, size_t *count, size_t index,
 void boaster_varray_clear(void **data, size_t *count);
 
 #define boaster_varray_add_struct(data, count, item) \
-    boaster_varray_add_bytes(data, count, &item, sizeof(item))
+    boaster_varray_add_bytes((void**) data, count, &item, sizeof(item))
 
 #define boaster_varray_remove_struct(data, count, index, type) \
     boaster_varray_remove_bytes(data, count, index, sizeof(type))
