@@ -11,21 +11,40 @@ void clear_screen() {
 void pass_through_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms,
     boaster_vertex_format_t *in_format,
     boaster_vertex_format_t *out_format) {
+    int in_position_idx =
+        boaster_vertex_format_get_property_index(in_format, "position");
+    int in_color_idx =
+        boaster_vertex_format_get_property_index(in_format, "color");
+    int out_position_idx =
+        boaster_vertex_format_get_property_index(out_format, "position");
+    int out_color_idx =
+        boaster_vertex_format_get_property_index(out_format, "color");
+
+    float* in_position =
+        boaster_vertex_format_get_floats(in_format, v_vertex, in_position_idx);
+    float* in_color =
+        boaster_vertex_format_get_floats(in_format, v_vertex, in_color_idx);
+
+    float* out_position =
+        boaster_vertex_format_get_floats(out_format, v_out, out_position_idx);
+    float* out_color =
+        boaster_vertex_format_get_floats(out_format, v_out, out_color_idx);
+
     boaster_vertex_t *in_vertex = (boaster_vertex_t*) v_vertex;
     boaster_vertex_t *out_vertex = (boaster_vertex_t*) v_out;
     float step = *(float*)v_uniforms;
-    float fx =  cos((step + in_vertex->position[1]) * M_PI * 2.0);
-    float fy = -sin((step + in_vertex->position[1]) * M_PI * 2.0);
+    float fx =  cos((step + in_position[1]) * M_PI * 2.0);
+    float fy = -sin((step + in_position[1]) * M_PI * 2.0);
 
-    out_vertex->position[0] = in_vertex->position[0] + fx * 0.1;
-    out_vertex->position[1] = in_vertex->position[1] + fx * 0.1;
-    out_vertex->position[2] = in_vertex->position[2];
-    out_vertex->position[3] = in_vertex->position[3];
+    out_position[0] = in_position[0] + fx * 0.1;
+    out_position[1] = in_position[1] + fx * 0.1;
+    out_position[2] = in_position[2];
+    out_position[3] = in_position[3];
 
-    out_vertex->color[0] = in_vertex->color[0];
-    out_vertex->color[1] = in_vertex->color[1];
-    out_vertex->color[2] = in_vertex->color[2];
-    out_vertex->color[3] = in_vertex->color[3];
+    out_color[0] = in_color[0];
+    out_color[1] = in_color[1];
+    out_color[2] = in_color[2];
+    out_color[3] = in_color[3];
 }
 
 float lerp(float a, float b, float f) {
@@ -33,7 +52,7 @@ float lerp(float a, float b, float f) {
 }
 
 char brightness_to_ascii(float brightness) {
-    const char* gradient = " .:-=+*#%@";
+    const char* gradient = " .-:=+*#%@";
     const int length = strlen(gradient);
 
     const int index = brightness * (float)(length - 1);
