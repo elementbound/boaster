@@ -11,24 +11,24 @@ void clear_screen() {
 void pass_through_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms,
     boaster_vertex_format_t *in_format,
     boaster_vertex_format_t *out_format) {
-    int in_position_idx =
-        boaster_vertex_format_get_property_index(in_format, "position");
-    int in_color_idx =
-        boaster_vertex_format_get_property_index(in_format, "color");
-    int out_position_idx =
-        boaster_vertex_format_get_property_index(out_format, "position");
-    int out_color_idx =
-        boaster_vertex_format_get_property_index(out_format, "color");
+    boaster_vertex_property_t* in_position_prop =
+        boaster_vertex_format_get_property(in_format, "position");
+    boaster_vertex_property_t* in_color_prop =
+        boaster_vertex_format_get_property(in_format, "color");
+    boaster_vertex_property_t* out_position_prop =
+        boaster_vertex_format_get_property(out_format, "position");
+    boaster_vertex_property_t* out_color_prop =
+        boaster_vertex_format_get_property(out_format, "color");
 
     float* in_position =
-        boaster_vertex_format_get_floats(in_format, v_vertex, in_position_idx);
+        boaster_vertex_property_get_floats(in_position_prop, v_vertex);
     float* in_color =
-        boaster_vertex_format_get_floats(in_format, v_vertex, in_color_idx);
+        boaster_vertex_property_get_floats(in_color_prop, v_vertex);
 
     float* out_position =
-        boaster_vertex_format_get_floats(out_format, v_out, out_position_idx);
+        boaster_vertex_property_get_floats(out_position_prop, v_out);
     float* out_color =
-        boaster_vertex_format_get_floats(out_format, v_out, out_color_idx);
+        boaster_vertex_property_get_floats(out_color_prop, v_out);
 
     boaster_vertex_t *in_vertex = (boaster_vertex_t*) v_vertex;
     boaster_vertex_t *out_vertex = (boaster_vertex_t*) v_out;
@@ -59,39 +59,21 @@ char brightness_to_ascii(float brightness) {
     return gradient[index];
 }
 
-void pixel_shader(void *v_vertices, float barycentrics[3],
-    void *v_out, void *v_uniforms) {
-    boaster_vertex_t *vertices = (boaster_vertex_t*) v_vertices;
-    boaster_pixel_t *out = (boaster_pixel_t*) v_out;
+void pixel_shader(
+    void *vertex,
+    void *v_out,
+    void *v_uniforms,
+    boaster_vertex_format_t *format) {
 
+    boaster_pixel_t *out = (boaster_pixel_t*) v_out;
+    boaster_vertex_property_t *in_color_p =
+        boaster_vertex_format_get_property(format, "color");
+    float *in_color = boaster_vertex_property_get_floats(in_color_p, vertex);
     float step = *(float*)v_uniforms;
+
     float f =  (1.0 + sin(step * M_PI * 2.0)) / 2.0;
 
-    float Ax = vertices[0].position[0];
-    float Ay = vertices[0].position[1];
-    float Az = vertices[0].position[2];
-
-    float Bx = vertices[1].position[0];
-    float By = vertices[1].position[1];
-    float Bz = vertices[1].position[2];
-
-    float Cx = vertices[2].position[0];
-    float Cy = vertices[2].position[1];
-    float Cz = vertices[2].position[2];
-
-    float v0x = Cx - Ax;
-    float v0y = Cy - Ay;
-    float v0z = Cz - Az;
-
-    float v1x = Bx - Ax;
-    float v1y = By - Ay;
-    float v1z = Bz - Az;
-
-    float Px = Ax + barycentrics[0] * v0x + barycentrics[1] * v1x;
-    float Py = Ay + barycentrics[0] * v0y + barycentrics[1] * v1y;
-    float Pz = Az + barycentrics[0] * v0z + barycentrics[1] * v1z;
-
-    float value = 0.05 + 0.95 * Px * Py;
+    float value = 0.1 + 0.9 * in_color[0];
     // value = 0.2 + 0.8 * f;
 
     out->color[0] = value * 255;
@@ -124,21 +106,21 @@ int main() {
     boaster_image_t *image = boaster_image_create(width, height);
 
     boaster_vertex_t triangle_vertices[] = {
-        { .position = { 0.2, 0.2, 0.0, 0.f }, .color = { 1.f, 0.f, 0.f, 1.f } },
-        { .position = { 0.8, 0.2, 0.0, 0.f }, .color = { 0.f, 1.f, 0.f, 1.f } },
-        { .position = { 0.2, 0.8, 0.0, 0.f }, .color = { 0.f, 1.f, 0.f, 1.f } },
+        { .position = { 0.2, 0.2, 0.0, 0.f }, .color = { 0.f, 0.f, 0.f, 1.f } },
+        { .position = { 0.8, 0.2, 0.0, 0.f }, .color = { 0.5, 1.f, 0.f, 1.f } },
+        { .position = { 0.2, 0.8, 0.0, 0.f }, .color = { 1.0, 1.f, 0.f, 1.f } },
 
-        { .position = { 0.2, 0.8, 0.0, 0.f }, .color = { 0.f, 1.f, 0.f, 1.f } },
-        { .position = { 0.8, 0.2, 0.0, 0.f }, .color = { 0.f, 1.f, 0.f, 1.f } },
-        { .position = { 0.8, 0.8, 0.0, 0.f }, .color = { 0.f, 1.f, 0.f, 1.f } },
+        { .position = { 0.2, 0.8, 0.0, 0.f }, .color = { 1.0, 1.f, 0.f, 1.f } },
+        { .position = { 0.8, 0.2, 0.0, 0.f }, .color = { 0.5, 1.f, 0.f, 1.f } },
+        { .position = { 0.8, 0.8, 0.0, 0.f }, .color = { 1.f, 1.f, 0.f, 1.f } },
     };
 
     boaster_vertex_format_t format;
     boaster_vertex_format_init(&format);
     boaster_vertex_format_add_property(&format, "position", sizeof(float), 4,
-        offsetof(boaster_vertex_t, position));
+        offsetof(boaster_vertex_t, position), boaster_floats_interpolator);
     boaster_vertex_format_add_property(&format, "color", sizeof(float), 4,
-        offsetof(boaster_vertex_t, color));
+        offsetof(boaster_vertex_t, color), boaster_floats_interpolator);
 
     boaster_buffer_t* vertex_buffer = boaster_buffer_create();
     boaster_buffer_push_bytes(vertex_buffer, triangle_vertices,
@@ -169,7 +151,7 @@ int main() {
         boaster_render(draw_call);
         dump_image(image);
 
-        usleep(100 * 1000);
+        usleep(50 * 1000);
     }
 
     boaster_image_destroy(image);

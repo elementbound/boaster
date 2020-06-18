@@ -3,6 +3,7 @@
 #include <string.h>
 #include "include/boaster/varray.h"
 #include "include/boaster/vertex_format.h"
+#include "include/boaster/interpolator.h"
 
 /**
  * Duplicate string and return its pointer.
@@ -20,6 +21,7 @@ char *strdup(const char *src) {
 void boaster_vertex_format_init(boaster_vertex_format_t *format) {
     boaster_varray_initialize((void**) &(format->properties),
         &(format->property_count));
+    format->interpolators = NULL;
 }
 
 size_t boaster_vertex_format_get_size(boaster_vertex_format_t *format) {
@@ -44,7 +46,8 @@ int boaster_vertex_format_add_property(boaster_vertex_format_t* format,
     const char *name,
     size_t component_size,
     size_t component_count,
-    int offset) {
+    int offset,
+    boaster_interpolator_t interpolator) {
     boaster_vertex_property_t property;
 
     property.name = strdup(name);
@@ -57,6 +60,15 @@ int boaster_vertex_format_add_property(boaster_vertex_format_t* format,
 
     boaster_varray_add_struct(&(format->properties), &(format->property_count),
         property);
+
+    format->interpolators = (boaster_interpolator_t*) realloc(
+        format->interpolators,
+        (format->property_count + 1) * sizeof(boaster_interpolator_t)
+    );
+
+    format->interpolators[format->property_count - 1] = interpolator
+        ? interpolator
+        : boaster_noop_interpolator;
 
     return format->property_count - 1;
 }
@@ -72,25 +84,12 @@ int boaster_vertex_format_get_property_index(boaster_vertex_format_t* format,
     return -1;
 }
 
-float* boaster_vertex_format_get_floats(boaster_vertex_format_t* format,
-    void *vertex,
-    int property_index) {
-    assert(property_index >= 0);
-    assert(property_index < format->property_count);
-    boaster_vertex_property_t property = format->properties[property_index];
+boaster_vertex_property_t* boaster_vertex_format_get_property(
+    boaster_vertex_format_t* format,
+    const char* name) {
 
-    return (float*)(vertex + property.offset);
-}
-
-float boaster_vertex_format_get_float(boaster_vertex_format_t* format,
-    void *vertex,
-    int property_index,
-    int component_index) {
-
-    float* components =
-        boaster_vertex_format_get_floats(format, vertex, property_index);
-
-    // NOTE: Assert for component index?
-
-    return components[component_index];
+    int index = boaster_vertex_format_get_property_index(format, name);
+    return index >= 0
+        ? &(format->properties[index])
+        : NULL;
 }
