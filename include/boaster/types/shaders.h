@@ -3,11 +3,17 @@
 
 #include "include/boaster/vertex_format.h"
 
-typedef void (*boaster_vertex_shader_t)(void *vertex, void *out,
+typedef void (*boaster_vertex_shader_t)(
+    void *vertex,
+    void *out,
     void *uniforms,
     boaster_vertex_format_t *in_format,
     boaster_vertex_format_t *out_format);
-typedef void (*boaster_pixel_shader_t)(void *vertices, float barycentrics[3],
-    void *out, void *uniforms);
+
+typedef void (*boaster_pixel_shader_t)(
+    void *vertex,
+    void *out,
+    void *uniforms,
+    boaster_vertex_format_t *format);
 
 #endif  // BOASTER_TYPES_SHADERS_H_

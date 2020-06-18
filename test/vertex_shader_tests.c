@@ -50,9 +50,9 @@ int main() {
     boaster_vertex_format_t format;
     boaster_vertex_format_init(&format);
     boaster_vertex_format_add_property(&format, "position", sizeof(float), 4,
-        offsetof(boaster_vertex_t, position));
+        offsetof(boaster_vertex_t, position), NULL);
     boaster_vertex_format_add_property(&format, "color", sizeof(float), 4,
-        offsetof(boaster_vertex_t, color));
+        offsetof(boaster_vertex_t, color), NULL);
 
     boaster_draw_call_t draw_call = {
         .vertex_shader = test_vertex_shader,

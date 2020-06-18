@@ -3,6 +3,11 @@
 #include "include/boaster/boaster.h"
 #include "include/boaster/buffer.h"
 
+typedef struct {
+    boaster_draw_call_t *draw_call;
+    void *vertex_data;
+} boaster_pixel_context_t;
+
 void boaster_run_vertex_shader(boaster_draw_call_t draw_call,
     size_t vertex_count,
     boaster_buffer_t *out) {
@@ -99,11 +104,25 @@ void pixel_callback(boaster_vertex_t* vertices,
     pixel->color[2] = 1;
     pixel->color[3] = 1;
 
+    boaster_pixel_context_t *pixel_context =
+        (boaster_pixel_context_t*) custom_data;
     boaster_draw_call_t* draw_call =
-        (boaster_draw_call_t*) custom_data;
+        pixel_context->draw_call;
+    boaster_vertex_format_t* format =
+        draw_call->transform_format;
 
-    draw_call->pixel_shader(vertices, barycentrics, pixel,
-        draw_call->uniform_data);
+    for (int i = 0; i < format->property_count; ++i) {
+        format->interpolators[i](
+            vertices,
+            barycentrics,
+            pixel_context->vertex_data,
+            boaster_vertex_format_get_size(format),
+            &(format->properties[i])
+        );
+    }
+
+    draw_call->pixel_shader(pixel_context->vertex_data, pixel,
+        draw_call->uniform_data, format);
 }
 
 void boaster_render(boaster_draw_call_t draw_call) {
@@ -132,14 +151,19 @@ void boaster_render(boaster_draw_call_t draw_call) {
     boaster_run_vertex_shader(draw_call, vertex_count, vertex_out);
 
     // Rasterize output triangles
+    boaster_pixel_context_t pixel_context;
+    pixel_context.draw_call = &draw_call;
+    pixel_context.vertex_data = malloc(out_vertex_size);
+
     for (size_t i = 0; i < vertex_count; i += 3) {
         boaster_vertex_t *vertices =
             boaster_buffer_see_index(vertex_out, boaster_vertex_t, i);
 
-        boaster_fill_triangle(vertices, image, (void*) &draw_call,
+        boaster_fill_triangle(vertices, image, (void*) &pixel_context,
             pixel_callback);
     }
 
     // Cleanup
+    free(pixel_context.vertex_data);
     boaster_buffer_destroy(vertex_out);
 }
