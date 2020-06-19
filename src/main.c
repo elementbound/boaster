@@ -103,7 +103,13 @@ void dump_image(boaster_image_t* image) {
 int main() {
     const size_t width = 32;
     const size_t height = 16;
-    boaster_image_t *image = boaster_image_create(width, height);
+
+    boaster_format_t pixel_format;
+    boaster_format_init(&pixel_format);
+    boaster_format_add_property(&pixel_format, "color", sizeof(unsigned char),
+        4, offsetof(boaster_pixel_t, color), NULL);
+
+    boaster_image_t *image = boaster_image_create(&pixel_format, width, height);
 
     boaster_vertex_t triangle_vertices[] = {
         { .position = { 0.2, 0.2, 0.0, 0.f }, .color = { 0.f, 0.f, 0.f, 1.f } },
@@ -127,7 +133,7 @@ int main() {
         sizeof(triangle_vertices));
 
     boaster_pixel_t background = {
-        .color = { 0, 0, 0, 1 }
+        .color = { 0, 0, 0, 255 }
     };
 
     boaster_draw_call_t draw_call = {

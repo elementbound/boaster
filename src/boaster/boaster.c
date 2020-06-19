@@ -99,11 +99,6 @@ void pixel_callback(boaster_vertex_t* vertices,
     boaster_pixel_t* pixel,
     void *custom_data) {
 
-    pixel->color[0] = 1;
-    pixel->color[1] = 1;
-    pixel->color[2] = 1;
-    pixel->color[3] = 1;
-
     boaster_pixel_context_t *pixel_context =
         (boaster_pixel_context_t*) custom_data;
     boaster_draw_call_t* draw_call =
