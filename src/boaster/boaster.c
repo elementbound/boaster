@@ -116,7 +116,7 @@ void pixel_callback(boaster_vertex_t* vertices,
             vertices,
             barycentrics,
             pixel_context->vertex_data,
-            boaster_format_get_size(format),
+            format->size,
             &(format->properties[i])
         );
     }
@@ -139,12 +139,12 @@ void boaster_render(boaster_draw_call_t draw_call) {
     boaster_image_t* image = draw_call.target_image;
 
     // Vertices must come in multiples of three, forming triangles
-    size_t in_vertex_size = boaster_format_get_size(input_format);
+    size_t in_vertex_size = input_format->size;
     size_t vertex_count = vertex_buffer->__size / in_vertex_size;
     assert(vertex_count % 3 == 0);
 
     // Allocate memory for vertex shader output
-    size_t out_vertex_size = boaster_format_get_size(transform_format);
+    size_t out_vertex_size = transform_format->size;
     boaster_buffer_t *vertex_out = boaster_buffer_create();
     boaster_buffer_ensure_capacity(vertex_out, out_vertex_size * vertex_count);
 
