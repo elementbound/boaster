@@ -50,6 +50,10 @@ test.buffer:
 test.image:
 	$(CC) $(INCLUDE) \
 		out/bin/test/test.o \
+		out/bin/boaster/format.o \
+		out/bin/boaster/interpolator.o \
+		out/bin/boaster/property.o \
+		out/bin/boaster/varray.o \
 		out/bin/boaster/image.o \
 		test/image_tests.c -o out/test/image_tests
 

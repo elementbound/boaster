@@ -3,18 +3,10 @@
 #include "include/test/test.h"
 
 int main() {
-    test("Created image should have correct pixel size",
-        // Given
-        const size_t width = 32;
-        const size_t height = 32;
-
-        // When
-        boaster_image_t* image = boaster_image_create(width, height);
-
-        // Then
-        test_assert(image->__pixel_size == sizeof(byte_t) * 4,
-            "Pixel size should equal four bytes")
-    );
+    boaster_format_t pixel_format;
+    boaster_format_init(&pixel_format);
+    boaster_format_add_property(&pixel_format, "color", sizeof(byte_t),
+        4, offsetof(boaster_pixel_t, color), NULL);
 
     test("Created image should allocate memory",
         // Given
@@ -22,7 +14,8 @@ int main() {
         const size_t height = 32;
 
         // When
-        boaster_image_t* image = boaster_image_create(width, height);
+        boaster_image_t* image =
+            boaster_image_create(&pixel_format, width, height);
 
         // Then
         test_assert(image->width == width,
