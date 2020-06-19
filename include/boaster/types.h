@@ -6,7 +6,7 @@
 #include "./types/shaders.h"
 #include "./image.h"
 #include "./buffer.h"
-#include "./vertex_format.h"
+#include "./format.h"
 
 #ifndef boaster_byte_t
     #define byte_t unsigned char
@@ -18,8 +18,8 @@ typedef struct {
     void* uniform_data;
 
     boaster_buffer_t* vertex_buffer;
-    boaster_vertex_format_t* input_format;
-    boaster_vertex_format_t* transform_format;
+    boaster_format_t* input_format;
+    boaster_format_t* transform_format;
 
     boaster_image_t* target_image;
 } boaster_draw_call_t;

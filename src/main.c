@@ -9,26 +9,26 @@ void clear_screen() {
 }
 
 void pass_through_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms,
-    boaster_vertex_format_t *in_format,
-    boaster_vertex_format_t *out_format) {
-    boaster_vertex_property_t* in_position_prop =
-        boaster_vertex_format_get_property(in_format, "position");
-    boaster_vertex_property_t* in_color_prop =
-        boaster_vertex_format_get_property(in_format, "color");
-    boaster_vertex_property_t* out_position_prop =
-        boaster_vertex_format_get_property(out_format, "position");
-    boaster_vertex_property_t* out_color_prop =
-        boaster_vertex_format_get_property(out_format, "color");
+    boaster_format_t *in_format,
+    boaster_format_t *out_format) {
+    boaster_property_t* in_position_prop =
+        boaster_format_get_property(in_format, "position");
+    boaster_property_t* in_color_prop =
+        boaster_format_get_property(in_format, "color");
+    boaster_property_t* out_position_prop =
+        boaster_format_get_property(out_format, "position");
+    boaster_property_t* out_color_prop =
+        boaster_format_get_property(out_format, "color");
 
     float* in_position =
-        boaster_vertex_property_get_floats(in_position_prop, v_vertex);
+        boaster_property_get_floats(in_position_prop, v_vertex);
     float* in_color =
-        boaster_vertex_property_get_floats(in_color_prop, v_vertex);
+        boaster_property_get_floats(in_color_prop, v_vertex);
 
     float* out_position =
-        boaster_vertex_property_get_floats(out_position_prop, v_out);
+        boaster_property_get_floats(out_position_prop, v_out);
     float* out_color =
-        boaster_vertex_property_get_floats(out_color_prop, v_out);
+        boaster_property_get_floats(out_color_prop, v_out);
 
     boaster_vertex_t *in_vertex = (boaster_vertex_t*) v_vertex;
     boaster_vertex_t *out_vertex = (boaster_vertex_t*) v_out;
@@ -63,12 +63,12 @@ void pixel_shader(
     void *vertex,
     void *v_out,
     void *v_uniforms,
-    boaster_vertex_format_t *format) {
+    boaster_format_t *format) {
 
     boaster_pixel_t *out = (boaster_pixel_t*) v_out;
-    boaster_vertex_property_t *in_color_p =
-        boaster_vertex_format_get_property(format, "color");
-    float *in_color = boaster_vertex_property_get_floats(in_color_p, vertex);
+    boaster_property_t *in_color_p =
+        boaster_format_get_property(format, "color");
+    float *in_color = boaster_property_get_floats(in_color_p, vertex);
     float step = *(float*)v_uniforms;
 
     float f =  (1.0 + sin(step * M_PI * 2.0)) / 2.0;
@@ -115,11 +115,11 @@ int main() {
         { .position = { 0.8, 0.8, 0.0, 0.f }, .color = { 1.f, 1.f, 0.f, 1.f } },
     };
 
-    boaster_vertex_format_t format;
-    boaster_vertex_format_init(&format);
-    boaster_vertex_format_add_property(&format, "position", sizeof(float), 4,
+    boaster_format_t format;
+    boaster_format_init(&format);
+    boaster_format_add_property(&format, "position", sizeof(float), 4,
         offsetof(boaster_vertex_t, position), boaster_floats_interpolator);
-    boaster_vertex_format_add_property(&format, "color", sizeof(float), 4,
+    boaster_format_add_property(&format, "color", sizeof(float), 4,
         offsetof(boaster_vertex_t, color), boaster_floats_interpolator);
 
     boaster_buffer_t* vertex_buffer = boaster_buffer_create();

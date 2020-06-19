@@ -14,8 +14,8 @@ void boaster_run_vertex_shader(boaster_draw_call_t draw_call,
 
     // Extract fields
     boaster_buffer_t* vertex_buffer = draw_call.vertex_buffer;
-    boaster_vertex_format_t* input_format = draw_call.input_format;
-    boaster_vertex_format_t* transform_format = draw_call.transform_format;
+    boaster_format_t* input_format = draw_call.input_format;
+    boaster_format_t* transform_format = draw_call.transform_format;
     boaster_vertex_shader_t vertex_shader = draw_call.vertex_shader;
     void* uniform_data = draw_call.uniform_data;
     boaster_image_t* image = draw_call.target_image;
@@ -108,7 +108,7 @@ void pixel_callback(boaster_vertex_t* vertices,
         (boaster_pixel_context_t*) custom_data;
     boaster_draw_call_t* draw_call =
         pixel_context->draw_call;
-    boaster_vertex_format_t* format =
+    boaster_format_t* format =
         draw_call->transform_format;
 
     for (int i = 0; i < format->property_count; ++i) {
@@ -116,7 +116,7 @@ void pixel_callback(boaster_vertex_t* vertices,
             vertices,
             barycentrics,
             pixel_context->vertex_data,
-            boaster_vertex_format_get_size(format),
+            boaster_format_get_size(format),
             &(format->properties[i])
         );
     }
@@ -131,20 +131,20 @@ void boaster_render(boaster_draw_call_t draw_call) {
 
     // Extract fields
     boaster_buffer_t* vertex_buffer = draw_call.vertex_buffer;
-    boaster_vertex_format_t* input_format = draw_call.input_format;
-    boaster_vertex_format_t* transform_format = draw_call.transform_format;
+    boaster_format_t* input_format = draw_call.input_format;
+    boaster_format_t* transform_format = draw_call.transform_format;
     boaster_vertex_shader_t vertex_shader = draw_call.vertex_shader;
     boaster_pixel_shader_t pixel_shader = draw_call.pixel_shader;
     void* uniform_data = draw_call.uniform_data;
     boaster_image_t* image = draw_call.target_image;
 
     // Vertices must come in multiples of three, forming triangles
-    size_t in_vertex_size = boaster_vertex_format_get_size(input_format);
+    size_t in_vertex_size = boaster_format_get_size(input_format);
     size_t vertex_count = vertex_buffer->__size / in_vertex_size;
     assert(vertex_count % 3 == 0);
 
     // Allocate memory for vertex shader output
-    size_t out_vertex_size = boaster_vertex_format_get_size(transform_format);
+    size_t out_vertex_size = boaster_format_get_size(transform_format);
     boaster_buffer_t *vertex_out = boaster_buffer_create();
     boaster_buffer_ensure_capacity(vertex_out, out_vertex_size * vertex_count);
 
