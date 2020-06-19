@@ -6,12 +6,12 @@ void boaster_noop_interpolator(
     float barycentrics[3],
     void* output,
     size_t vertex_size,
-    boaster_vertex_property_t* property
+    boaster_property_t* property
 ) {
     void *src =
-        boaster_vertex_property_get_pointer(property, input_vertices);
+        boaster_property_get_pointer(property, input_vertices);
     void *dst =
-        boaster_vertex_property_get_pointer(property, output);
+        boaster_property_get_pointer(property, output);
 
     memcpy(dst, src, property->size);
 }
@@ -21,18 +21,18 @@ void boaster_floats_interpolator(
     float barycentrics[3],
     void* output,
     size_t vertex_size,
-    boaster_vertex_property_t* property
+    boaster_property_t* property
 ) {
     float *data[] = {
-        boaster_vertex_property_get_floats(property,
+        boaster_property_get_floats(property,
             input_vertices + vertex_size * 0),
-        boaster_vertex_property_get_floats(property,
+        boaster_property_get_floats(property,
             input_vertices + vertex_size * 1),
-        boaster_vertex_property_get_floats(property,
+        boaster_property_get_floats(property,
             input_vertices + vertex_size * 2),
     };
 
-    float* out = boaster_vertex_property_get_floats(property, output);
+    float* out = boaster_property_get_floats(property, output);
 
     for (int i = 0; i < property->component_count; i++) {
         float v0 = data[2][i] - data[0][i];

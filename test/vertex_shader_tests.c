@@ -8,8 +8,8 @@ typedef struct {
 } test_uniforms_t;
 
 void test_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms,
-    boaster_vertex_format_t *in_format,
-    boaster_vertex_format_t *out_format) {
+    boaster_format_t *in_format,
+    boaster_format_t *out_format) {
     boaster_vertex_t *in_vertex = (boaster_vertex_t*) v_vertex;
     boaster_vertex_t *out_vertex = (boaster_vertex_t*) v_out;
     test_uniforms_t *uniforms = (test_uniforms_t*) v_uniforms;
@@ -47,11 +47,11 @@ int main() {
     boaster_buffer_t *vertex_buffer = boaster_buffer_create();
     boaster_buffer_push_bytes(vertex_buffer, vertices, sizeof(vertices));
 
-    boaster_vertex_format_t format;
-    boaster_vertex_format_init(&format);
-    boaster_vertex_format_add_property(&format, "position", sizeof(float), 4,
+    boaster_format_t format;
+    boaster_format_init(&format);
+    boaster_format_add_property(&format, "position", sizeof(float), 4,
         offsetof(boaster_vertex_t, position), NULL);
-    boaster_vertex_format_add_property(&format, "color", sizeof(float), 4,
+    boaster_format_add_property(&format, "color", sizeof(float), 4,
         offsetof(boaster_vertex_t, color), NULL);
 
     boaster_draw_call_t draw_call = {

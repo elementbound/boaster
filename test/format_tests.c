@@ -1,6 +1,6 @@
 #include <stddef.h>  // offsetof
 #include <string.h>
-#include "include/boaster/vertex_format.h"
+#include "include/boaster/format.h"
 #include "include/test/test.h"
 
 typedef struct {
@@ -12,10 +12,10 @@ typedef struct {
 int main() {
     test("Initialize should empty format",
         // Given
-        boaster_vertex_format_t format;
+        boaster_format_t format;
 
         // When
-        boaster_vertex_format_init(&format);
+        boaster_format_init(&format);
 
         // Then
         test_assert(!format.properties,
@@ -24,20 +24,20 @@ int main() {
             "Properties count should be zero")
 
         // Teardown
-        boaster_vertex_format_clear(&format);
+        boaster_format_clear(&format);
     )
 
     test("Add property should append property",
         // Given
-        boaster_vertex_format_t format;
-        boaster_vertex_format_init(&format);
+        boaster_format_t format;
+        boaster_format_init(&format);
 
         // When
-        boaster_vertex_format_add_property(&format, "position", sizeof(float),
+        boaster_format_add_property(&format, "position", sizeof(float),
             4, 0, NULL);
-        boaster_vertex_format_add_property(&format, "color", sizeof(char),
+        boaster_format_add_property(&format, "color", sizeof(char),
             4, 16, NULL);
-        boaster_vertex_format_add_property(&format, "normals", sizeof(float),
+        boaster_format_add_property(&format, "normals", sizeof(float),
             3, 20, NULL);
 
         // Then
@@ -82,14 +82,14 @@ int main() {
 
     test("Get property index should (silently) fail if not found",
         // Given
-        boaster_vertex_format_t format;
-        boaster_vertex_format_init(&format);
+        boaster_format_t format;
+        boaster_format_init(&format);
 
-        boaster_vertex_format_add_property(&format, "position", sizeof(float),
+        boaster_format_add_property(&format, "position", sizeof(float),
             4, 0, NULL);
 
         // When
-        int index = boaster_vertex_format_get_property_index(&format, "nope");
+        int index = boaster_format_get_property_index(&format, "nope");
 
         // Then
         test_assert(index == -1, "Index should be -1")
@@ -97,16 +97,16 @@ int main() {
 
     test("Get property index should return index if found",
         // Given
-        boaster_vertex_format_t format;
-        boaster_vertex_format_init(&format);
+        boaster_format_t format;
+        boaster_format_init(&format);
 
-        boaster_vertex_format_add_property(&format, "position", sizeof(float),
+        boaster_format_add_property(&format, "position", sizeof(float),
             4, 0, NULL);
-        boaster_vertex_format_add_property(&format, "color", sizeof(char),
+        boaster_format_add_property(&format, "color", sizeof(char),
             4, 16, NULL);
 
         // When
-        int index = boaster_vertex_format_get_property_index(&format, "color");
+        int index = boaster_format_get_property_index(&format, "color");
 
         // Then
         test_assert(index == 1, "Index should be 1")
@@ -120,29 +120,29 @@ int main() {
 
     test("Get property component should return value",
         // Given
-        boaster_vertex_format_t format;
-        boaster_vertex_format_init(&format);
+        boaster_format_t format;
+        boaster_format_init(&format);
 
-        boaster_vertex_format_add_property(&format, "position", sizeof(float),
+        boaster_format_add_property(&format, "position", sizeof(float),
             4, offsetof(test_vertex_format_t, position), NULL);
-        boaster_vertex_format_add_property(&format, "color", sizeof(float),
+        boaster_format_add_property(&format, "color", sizeof(float),
             4, offsetof(test_vertex_format_t, color), NULL);
-        boaster_vertex_format_add_property(&format, "normal", sizeof(float),
+        boaster_format_add_property(&format, "normal", sizeof(float),
             3, offsetof(test_vertex_format_t, normal), NULL);
 
         int pos_index =
-            boaster_vertex_format_get_property_index(&format, "position");
+            boaster_format_get_property_index(&format, "position");
         int color_index =
-            boaster_vertex_format_get_property_index(&format, "color");
+            boaster_format_get_property_index(&format, "color");
         int normal_index =
-            boaster_vertex_format_get_property_index(&format, "normal");
+            boaster_format_get_property_index(&format, "normal");
 
-        boaster_vertex_property_t *pos_property =
+        boaster_property_t *pos_property =
             &(format.properties[pos_index]);
 
         // When
         float* values =
-            boaster_vertex_property_get_floats(pos_property, &vertex);
+            boaster_property_get_floats(pos_property, &vertex);
 
         // Then
         test_assert(values[1] == 2.0, "Position component should be 2")
@@ -150,29 +150,29 @@ int main() {
 
     test("Get property should return array",
         // Given
-        boaster_vertex_format_t format;
-        boaster_vertex_format_init(&format);
+        boaster_format_t format;
+        boaster_format_init(&format);
 
-        boaster_vertex_format_add_property(&format, "position", sizeof(float),
+        boaster_format_add_property(&format, "position", sizeof(float),
             4, offsetof(test_vertex_format_t, position), NULL);
-        boaster_vertex_format_add_property(&format, "color", sizeof(float),
+        boaster_format_add_property(&format, "color", sizeof(float),
             4, offsetof(test_vertex_format_t, color), NULL);
-        boaster_vertex_format_add_property(&format, "normal", sizeof(float),
+        boaster_format_add_property(&format, "normal", sizeof(float),
             3, offsetof(test_vertex_format_t, normal), NULL);
 
         int pos_index =
-            boaster_vertex_format_get_property_index(&format, "position");
+            boaster_format_get_property_index(&format, "position");
         int color_index =
-            boaster_vertex_format_get_property_index(&format, "color");
+            boaster_format_get_property_index(&format, "color");
         int normal_index =
-            boaster_vertex_format_get_property_index(&format, "normal");
+            boaster_format_get_property_index(&format, "normal");
 
-        boaster_vertex_property_t *pos_property =
+        boaster_property_t *pos_property =
             &(format.properties[pos_index]);
 
         // When
         float* actual =
-            boaster_vertex_property_get_floats(pos_property, &vertex);
+            boaster_property_get_floats(pos_property, &vertex);
 
         // Then
         test_assert(actual == vertex.position,
