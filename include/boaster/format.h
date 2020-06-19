@@ -9,10 +9,10 @@ typedef struct {
     boaster_property_t *properties;
     boaster_interpolator_t *interpolators;
     size_t property_count;
+    size_t size;
 } boaster_format_t;
 
 void boaster_format_init(boaster_format_t *format);
-size_t boaster_format_get_size(boaster_format_t *format);
 void boaster_format_clear(boaster_format_t *format);
 
 int boaster_format_add_property(boaster_format_t* format,

@@ -22,9 +22,10 @@ void boaster_format_init(boaster_format_t *format) {
     boaster_varray_initialize((void**) &(format->properties),
         &(format->property_count));
     format->interpolators = NULL;
+    format->size = 0;
 }
 
-size_t boaster_format_get_size(boaster_format_t *format) {
+size_t boaster_format_calculate_size(const boaster_format_t *format) {
     int result = 0;
     for (int i = 0; i < format->property_count; i++) {
         boaster_property_t property = format->properties[i];
@@ -69,6 +70,8 @@ int boaster_format_add_property(boaster_format_t* format,
     format->interpolators[format->property_count - 1] = interpolator
         ? interpolator
         : boaster_noop_interpolator;
+
+    format->size = boaster_format_calculate_size(format);
 
     return format->property_count - 1;
 }
