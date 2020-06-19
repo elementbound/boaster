@@ -1,8 +1,24 @@
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 #include <math.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 #include "include/boaster/boaster.h"
+#include "include/millitime.h"
+
+double time_spent = 0;
+uint64_t vertices_rendered = 0;
+
+void exit_handler(int _) {
+    printf("\n");
+    printf("Rendered %d vertices in %f ms\n", vertices_rendered, time_spent);
+    printf("Average rendering speed: %f vertices / sec\n",
+        vertices_rendered * 1000.0 / time_spent);
+
+    exit(0);
+}
 
 void clear_screen() {
     printf("\e[1;1H\e[2J");
@@ -104,6 +120,8 @@ int main() {
     const size_t width = 32;
     const size_t height = 16;
 
+    signal(SIGINT, exit_handler);
+
     boaster_format_t pixel_format;
     boaster_format_init(&pixel_format);
     boaster_format_add_property(&pixel_format, "color", sizeof(unsigned char),
@@ -145,6 +163,8 @@ int main() {
         .target_image = image
     };
 
+    uint64_t vertex_count = vertex_buffer->__size / format.size;
+
     for (int i = 0; ; i++) {
         if (i > image->width)
             i -= image->width;
@@ -154,8 +174,17 @@ int main() {
         clear_screen();
         boaster_image_fill(image, &background, sizeof(background));
         draw_call.uniform_data = &f;
+
+        double t_start = get_millitime();
         boaster_render(draw_call);
+        double t_end = get_millitime();
+
         dump_image(image);
+
+        time_spent += t_end - t_start;
+        vertices_rendered += vertex_count;
+
+        printf("%f ms\n", t_end - t_start);
 
         usleep(50 * 1000);
     }
