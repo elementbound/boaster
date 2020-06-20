@@ -38,6 +38,8 @@ void boaster_floats_interpolator(
         float v0 = data[2][i] - data[0][i];
         float v1 = data[1][i] - data[0][i];
 
-        out[i] = data[0][i] + barycentrics[0] * v0 + barycentrics[1] * v1;
+        out[i] = data[0][i]
+            + barycentrics[0] * 0.95 * v0
+            + barycentrics[1] * 0.95 * v1;
     }
 }
