@@ -104,11 +104,11 @@ void pixel_shader(
 }
 
 int main() {
-    const size_t width = 160;
-    const size_t height = 160;
-    const float scale = 4;
-    const size_t target_fps = 20;
-    const size_t target_rest = 1000 / target_fps;
+    const size_t width = 320;
+    const size_t height = 320;
+    const float scale = 2;
+    const size_t target_fps = 1000;
+    const double target_rest = 1000.0 / ((double)target_fps);
 
     double time_spent = 0;
     uint64_t vertices_rendered = 0;
@@ -166,24 +166,27 @@ int main() {
 
         float f = i / (float)image->width;
 
+        double t_start = get_millitime();
         clear_screen();
         boaster_image_fill(image, &background, sizeof(background));
         draw_call.uniform_data = &f;
 
-        double t_start = get_millitime();
         boaster_render(draw_call);
+        boastgl_window_push_image(window, image, scale);
         double t_end = get_millitime();
         double frame_time = t_end - t_start;
-
-        boastgl_window_push_image(window, image, scale);
 
         time_spent += t_end - t_start;
         vertices_rendered += vertex_count;
 
-        printf("%f ms\n", frame_time);
+        printf("Frame: %f ms\n", frame_time);
 
-        if (frame_time > target_rest) {
-            usleep((target_rest - frame_time) * 1000);
+        double rest = target_rest - frame_time;
+        if (rest > 0) {
+            printf("Rest: %f us => target %f us\n",
+                rest * 1000.0, target_rest * 1000);
+            // usleep(100 * 1000);
+            usleep(rest * 1000);
         }
     }
 
