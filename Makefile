@@ -1,6 +1,8 @@
 INCLUDE = -I.
 
-build: compile
+all: test main glmain
+
+main: compile
 	$(CC) $(INCLUDE) \
 		out/bin/boaster/buffer.o \
 		out/bin/boaster/image.o \
@@ -12,6 +14,21 @@ build: compile
 		out/bin/millitime.o \
 		-lm \
 		src/main.c -o out/main
+
+glmain: compile
+	$(CC) $(INCLUDE) \
+		out/bin/boaster/buffer.o \
+		out/bin/boaster/image.o \
+		out/bin/boaster/interpolator.o \
+		out/bin/boaster/varray.o \
+		out/bin/boaster/format.o \
+		out/bin/boaster/property.o \
+		out/bin/boaster/boaster.o \
+		out/bin/boastgl/boastgl.o \
+		out/bin/millitime.o \
+		-lm \
+		-lglfw3 -lGL -pthread -ldl -lrt -lXrandr -lX11 \
+		src/glmain.c -o out/glmain
 
 test: compile test.buffer test.image test.vertex_shader test.varray test.format
 	out/test/buffer_tests
@@ -29,12 +46,15 @@ compile: _ensure_out
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/property.c -o out/bin/boaster/property.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/varray.c -o out/bin/boaster/varray.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/millitime.c -o out/bin/millitime.o
-	$(CC) $(INCLUDE) $(CFLAGS) -c src/test/test.c -o out/bin/test/test.o
+	$(CC) $(INCLUDE) $(CFLAGS) -c src/test/test.c -o out/bin/test/test.o3
+
+	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastgl/boastgl.c -o out/bin/boastgl/boastgl.o
 
 _ensure_out:
 	mkdir -p out
 	mkdir -p out/bin/test
 	mkdir -p out/bin/boaster
+	mkdir -p out/bin/boastgl
 	mkdir -p out/test
 
 clean:

@@ -110,8 +110,6 @@ void boastgl_window_push_image(
     // Push texture to OpenGL
     glfwMakeContextCurrent(window->gl_window);
 
-    printf("GL texture: %d\n", window->texture);
-
     glBindTexture(GL_TEXTURE_2D, window->texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->width, image->height, 0,
         GL_RGB, GL_UNSIGNED_BYTE, buffer->data);
