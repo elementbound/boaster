@@ -60,7 +60,7 @@ _ensure_out:
 clean:
 	rm -rf out
 
-run: build
+run: main
 	out/main
 
 test.buffer:
