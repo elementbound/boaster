@@ -1,6 +1,6 @@
 INCLUDE = -I.
 
-all: test main glmain
+all: test main glmain executor
 
 main: compile
 	$(CC) $(INCLUDE) \
@@ -30,6 +30,13 @@ glmain: compile
 		-lglfw3 -lGL -pthread -ldl -lrt -lXrandr -lX11 \
 		src/glmain.c -o out/glmain
 
+executor: compile
+	$(CC) $(INCLUDE) \
+		out/bin/boaster/buffer.o \
+		out/bin/boaster/executor.o \
+		-lpthread \
+		src/executor.c -o out/executor
+
 test: compile test.buffer test.image test.vertex_shader test.varray test.format
 	out/test/buffer_tests
 	out/test/varray_tests
@@ -40,6 +47,7 @@ test: compile test.buffer test.image test.vertex_shader test.varray test.format
 compile: _ensure_out
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/boaster.c -o out/bin/boaster/boaster.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/buffer.c -o out/bin/boaster/buffer.o
+	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/executor.c -o out/bin/boaster/executor.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/format.c -o out/bin/boaster/format.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/image.c -o out/bin/boaster/image.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/interpolator.c -o out/bin/boaster/interpolator.o
