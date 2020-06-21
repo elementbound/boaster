@@ -6,12 +6,12 @@
 #include "include/boaster/types/pixel.h"
 #include "include/boastgl/boastgl.h"
 
-typedef struct boastgl_window_t {
+struct boastgl_window_t {
     GLFWwindow *gl_window;
     int is_open;
     GLuint texture;
     boaster_buffer_t* buffer;
-} boastgl_window_t;
+};
 
 void boastgl_print_error(int error, const char* message) {
     printf("[boastgl] GLFW error#%d: %s\n", error, message);

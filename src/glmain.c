@@ -119,7 +119,7 @@ int main() {
         return 2;
     }
 
-    struct boastgl_window_t *window = boastgl_window_create();
+    boastgl_window_t *window = boastgl_window_create();
 
     boaster_format_t pixel_format;
     boaster_format_init(&pixel_format);
