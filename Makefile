@@ -5,6 +5,7 @@ all: test main glmain executor
 main: compile
 	$(CC) $(INCLUDE) \
 		out/bin/boaster/buffer.o \
+		out/bin/boaster/executor.o \
 		out/bin/boaster/image.o \
 		out/bin/boaster/interpolator.o \
 		out/bin/boaster/varray.o \
@@ -12,12 +13,13 @@ main: compile
 		out/bin/boaster/property.o \
 		out/bin/boaster/boaster.o \
 		out/bin/millitime.o \
-		-lm \
+		-lm -lpthread \
 		src/main.c -o out/main
 
 glmain: compile
 	$(CC) $(INCLUDE) \
 		out/bin/boaster/buffer.o \
+		out/bin/boaster/executor.o \
 		out/bin/boaster/image.o \
 		out/bin/boaster/interpolator.o \
 		out/bin/boaster/varray.o \
