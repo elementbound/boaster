@@ -119,6 +119,13 @@ int main() {
         return 2;
     }
 
+    boaster_config_t config = {
+        .raster_mode = THREADED,
+        .num_threads = -1
+    };
+
+    boaster_context_t *context = boaster_context_create(config);
+
     boastgl_window_t *window = boastgl_window_create();
 
     boaster_format_t pixel_format;
@@ -171,7 +178,7 @@ int main() {
         boaster_image_fill(image, &background, sizeof(background));
         draw_call.uniform_data = &f;
 
-        boaster_render(draw_call);
+        boaster_render(context, draw_call);
         boastgl_window_push_image(window, image, scale);
         double t_end = get_millitime();
         double frame_time = t_end - t_start;

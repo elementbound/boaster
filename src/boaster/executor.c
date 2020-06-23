@@ -116,7 +116,6 @@ void boaster_executor_push_task(
     boaster_buffer_push_data(executor->task_buffer, boaster_task_t, task);
     ++(executor->task_count);
 
-    pthread_cond_broadcast(&executor->availability_condition);
     boaster_executor_unlock(executor);
 }
 
