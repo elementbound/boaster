@@ -122,6 +122,12 @@ int main() {
 
     signal(SIGINT, exit_handler);
 
+    boaster_config_t config = {
+        .raster_mode = THREADED
+    };
+
+    boaster_context_t *context = boaster_context_create(config);
+
     boaster_format_t pixel_format;
     boaster_format_init(&pixel_format);
     boaster_format_add_property(&pixel_format, "color", sizeof(unsigned char),
@@ -176,7 +182,7 @@ int main() {
         draw_call.uniform_data = &f;
 
         double t_start = get_millitime();
-        boaster_render(draw_call);
+        boaster_render(context, draw_call);
         double t_end = get_millitime();
 
         dump_image(image);
