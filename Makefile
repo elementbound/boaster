@@ -26,7 +26,6 @@ glmain: compile
 		out/bin/boaster/format.o \
 		out/bin/boaster/property.o \
 		out/bin/boaster/boaster.o \
-		out/bin/boastgl/boastgl.o \
 		out/bin/millitime.o \
 		-lm \
 		-lglfw3 -lGL -pthread -ldl -lrt -lXrandr -lX11 \
@@ -39,12 +38,15 @@ executor: compile
 		-lpthread \
 		src/executor.c -o out/executor
 
-test: compile test.buffer test.image test.vertex_shader test.varray test.format
+test: test.boastmath compile test.buffer test.image test.vertex_shader test.varray test.format
 	out/test/buffer_tests
 	out/test/varray_tests
 	out/test/image_tests
 	out/test/vertex_shader_tests
 	out/test/format_tests
+
+test.boastmath: compile test.matrix
+	out/test/boastmath/matrix_tests
 
 compile: _ensure_out
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/boaster.c -o out/bin/boaster/boaster.o
@@ -60,12 +62,18 @@ compile: _ensure_out
 
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastgl/boastgl.c -o out/bin/boastgl/boastgl.o
 
+	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastmath/vector.c -o out/bin/boastmath/vector.o
+	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastmath/matrix.c -o out/bin/boastmath/matrix.o
+
 _ensure_out:
 	mkdir -p out
 	mkdir -p out/bin/test
 	mkdir -p out/bin/boaster
 	mkdir -p out/bin/boastgl
+	mkdir -p out/bin/boastmath
 	mkdir -p out/test
+	mkdir -p out/test/boastmath
+	mkdir -p out/boastmath
 
 clean:
 	rm -rf out
@@ -117,3 +125,11 @@ test.varray:
 		out/bin/test/test.o \
 		out/bin/boaster/varray.o \
 		test/varray_tests.c -o out/test/varray_tests
+
+test.matrix:
+	$(CC) $(INCLUDE) \
+		out/bin/test/test.o \
+		out/bin/boastmath/matrix.o \
+		out/bin/boastmath/vector.o \
+		-lm \
+		test/boastmath/matrix_tests.c -o out/test/boastmath/matrix_tests
