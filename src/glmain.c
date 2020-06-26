@@ -112,6 +112,7 @@ int main() {
 
     double time_spent = 0;
     uint64_t vertices_rendered = 0;
+    uint64_t frames_rendered = 0;
 
     signal(SIGINT, exit_handler);
     if (!boastgl_init()) {
@@ -185,6 +186,7 @@ int main() {
 
         time_spent += t_end - t_start;
         vertices_rendered += vertex_count;
+        ++frames_rendered;
 
         printf("Frame: %f ms\n", frame_time);
 
@@ -199,8 +201,10 @@ int main() {
 
     printf("\n");
     printf("Rendered %d vertices in %f ms\n", vertices_rendered, time_spent);
-    printf("Average rendering speed: %f vertices / sec\n",
-        vertices_rendered * 1000.0 / time_spent);
+    printf("Rendered %d frames in %f ms\n", frames_rendered, time_spent);
+    printf("Average rendering speed: %f vertices / sec @ %f fps\n",
+        vertices_rendered * 1000.0 / time_spent,
+        frames_rendered * 1000.0 / time_spent);
 
     boaster_image_destroy(image);
     boastgl_window_destroy(window);
