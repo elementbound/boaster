@@ -1,6 +1,7 @@
 #include <string.h>
 #include "include/boastmath/matrix.h"
 #include "include/test/test.h"
+#include "include/boastmath/vector.h"
 
 void vec4_dump(bm_vec4 v) {
     printf("[%f %f %f %f]",
@@ -97,6 +98,38 @@ void test_mat4_x_identity() {
     mat4_dump(expected);
 }
 
+void test_lookat_in_front () {
+    // Given
+    bm_vec4 from = {1.0, 1.0, 1.0, 1.0};
+    bm_vec4 at = {0.0, 0.0, 0.0, 1.0};
+    bm_vec4 up = {0.0, 0.0, 1.0, 1.0};
+
+    bm_vec4 v = {-1.0, -1.0, -1.0, 1.0};
+    bm_vec4 expected = {0.0, 0.0, 2.0, 1.0};
+    bm_vec4 actual;
+
+    // When
+    bm_mat4 mat;
+    bm_mat_lookat(mat,
+        bm_spread_vec3(from),
+        bm_spread_vec3(at),
+        bm_spread_vec3(up)
+    );
+
+    bm_mattrans(actual, mat, v);
+
+    // Then
+    printf("Matrix:\n");
+    mat4_dump(mat);
+
+    printf("Actual: ");
+    vec4_dump(actual);
+    
+    printf("\nExpected: ");
+    vec4_dump(expected);
+    printf("\n");
+}
+
 int main() {
     test("mat4 x vec4",
         test_mat4_x_mat4();
@@ -104,6 +137,10 @@ int main() {
 
     test("mat4 x identity",
         test_mat4_x_identity();
+    );
+
+    test("lookat front",
+        test_lookat_in_front();
     );
 
     return test_summarize();
