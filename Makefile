@@ -1,28 +1,28 @@
 INCLUDE = -I. -Itestboat -Iboaster -Iboastgl
 LDFLAGS = -L./testboat/lib -L./boaster/lib -L./boastgl/lib -L./boastmath/lib
 
-all: main glmain executor
+samples: main glmain executor
 
-main:
+main: ensure_out
 	$(CC) $(INCLUDE) $(LDFLAGS) \
-		src/main.c \
+		samples/main.c \
 		-lm -lpthread -lboaster \
 		-o out/main
 
-glmain:
+glmain: ensure_out
 	$(CC) $(INCLUDE) $(LDFLAGS) \
-		src/glmain.c \
+		samples/glmain.c \
 		-lm -lboaster -lboastgl \
 		-lglfw3 -lGL -pthread -ldl -lrt -lXrandr -lX11 \
 		-o out/glmain
 
-executor:
+executor: ensure_out
 	$(CC) $(INCLUDE) $(LDFLAGS) \
-		src/executor.c \
+		samples/executor.c \
 		-lpthread -lboaster \
 		-o out/executor
 
-_ensure_out:
+ensure_out:
 	mkdir -p out
 
 clean:
