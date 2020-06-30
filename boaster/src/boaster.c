@@ -135,7 +135,6 @@ void boaster_single_raster(
     for (int y = 0; y < image->height; ++y) {
         for (int x = 0; x < image->width; ++x) {
             for (int i = 0; i < vertex_count; i += 3) {
-
                 float barycentrics[] = { 0, 0, 0 };
 
                 boaster_vertex_t *vertices =
@@ -316,10 +315,65 @@ void boaster_context_destroy(boaster_context_t *context) {
     free(context);
 }
 
-void boaster_render(boaster_context_t *context, boaster_draw_call_t draw_call) {
-    assert(context != NULL);
-    assert(draw_call.vertex_buffer != NULL);
-    assert(draw_call.vertex_shader != NULL);
+int boaster_format_check_position(boaster_format_t *format) {
+    assert(format);
+
+    boaster_property_t *position =
+        boaster_format_get_property(format, "position");
+
+    int position_index =
+        boaster_format_get_property_index(format, "position");
+
+    if (!position)
+        return 0;
+
+    if (position_index != 0)
+        return 0;
+
+    if (position->component_size != sizeof(float))
+        return 0;
+
+    if (position->component_count < 3)
+        return 0;
+
+    return 1;
+}
+
+boaster_error_t boaster_validate_draw_call(boaster_draw_call_t draw_call) {
+    if (!draw_call.vertex_shader)
+        return BOASTER_MISSING_VERTEX_SHADER;
+
+    if (!draw_call.pixel_shader)
+        return BOASTER_MISSING_PIXEL_SHADER;
+
+    if (!draw_call.vertex_buffer)
+        return BOASTER_MISSING_VERTEX_BUFFER;
+
+    if (!draw_call.input_format)
+        return BOASTER_MISSING_INPUT_FORMAT;
+
+    if (!boaster_format_check_position(draw_call.input_format))
+        return BOASTER_BAD_INPUT_FORMAT;
+
+    if (!draw_call.transform_format)
+        return BOASTER_MISSING_TRANSFORM_FORMAT;
+
+    if (!draw_call.target_image)
+        return BOASTER_MISSING_IMAGE;
+
+    return BOASTER_OK;
+}
+
+boaster_error_t boaster_render(
+    boaster_context_t *context,
+    boaster_draw_call_t draw_call
+    ) {
+    if (!context)
+        return BOASTER_MISSING_CONTEXT;
+
+    boaster_error_t error = boaster_validate_draw_call(draw_call);
+    if (error != BOASTER_OK)
+        return error;
 
     // Extract fields
     boaster_buffer_t* vertex_buffer = draw_call.vertex_buffer;
@@ -360,4 +414,6 @@ void boaster_render(boaster_context_t *context, boaster_draw_call_t draw_call) {
     // Cleanup
     free(pixel_context.vertex_data);
     boaster_buffer_destroy(vertex_out);
+
+    return BOASTER_OK;
 }

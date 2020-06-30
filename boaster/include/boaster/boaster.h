@@ -31,13 +31,36 @@ typedef void (*boaster_pixel_callback_t)(boaster_vertex_t* vertices,
     boaster_pixel_t *pixel,
     void *custom_data);
 
+typedef enum {
+    BOASTER_OK,
+
+    BOASTER_MISSING_VERTEX_SHADER,
+    BOASTER_MISSING_PIXEL_SHADER,
+
+    BOASTER_MISSING_VERTEX_BUFFER,
+    BOASTER_MISSING_INPUT_FORMAT,
+    BOASTER_BAD_INPUT_FORMAT,
+    BOASTER_MISSING_TRANSFORM_FORMAT,
+
+    BOASTER_MISSING_IMAGE,
+
+    BOASTER_MISSING_CONTEXT
+} boaster_error_t;
+
 boaster_context_t *boaster_context_create(boaster_config_t config);
 void boaster_context_destroy(boaster_context_t *context);
 
-void boaster_run_vertex_shader(boaster_draw_call_t draw_call,
+void boaster_run_vertex_shader(
+    boaster_draw_call_t draw_call,
     size_t vertex_count,
-    boaster_buffer_t *out);
+    boaster_buffer_t *out
+);
 
-void boaster_render(boaster_context_t *context, boaster_draw_call_t draw_call);
+boaster_error_t boaster_validate_draw_call(boaster_draw_call_t draw_call);
+
+boaster_error_t boaster_render(
+    boaster_context_t *context,
+    boaster_draw_call_t draw_call
+);
 
 #endif  // BOASTER_BOASTER_H_
