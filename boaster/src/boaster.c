@@ -39,11 +39,8 @@ void boaster_run_vertex_shader(boaster_draw_call_t draw_call,
     boaster_image_t* image = draw_call.target_image;
 
     for(size_t i = 0; i < vertex_count; i++) {
-        void* input_vertex = boaster_buffer_see_index(vertex_buffer,
-            boaster_vertex_t, i);
-
-        void* output_vertex = boaster_buffer_see_index(out,
-            boaster_vertex_t, i);
+        void* input_vertex = vertex_buffer->data + input_format->size * i;
+        void* output_vertex = out->data + transform_format->size * i;
 
         vertex_shader(input_vertex, output_vertex, uniform_data,
             input_format, transform_format);
@@ -90,25 +87,22 @@ int boaster_check_point_in_triangle(
 }
 
 int boaster_point_in_vbuf_triangle(
-    void *buffer,
+    float **vertices,
     int x, int y, int i,
     float *barycentrics,
     boaster_image_t *image) {
 
-    boaster_vertex_t *vertices =
-        &((boaster_vertex_t*) buffer)[i];
+    float Ax = vertices[0][0];
+    float Ay = vertices[0][1];
+    float Az = vertices[0][2];
 
-    float Ax = vertices[0].position[0];
-    float Ay = vertices[0].position[1];
-    float Az = vertices[0].position[2];
+    float Bx = vertices[1][0];
+    float By = vertices[1][1];
+    float Bz = vertices[1][2];
 
-    float Bx = vertices[1].position[0];
-    float By = vertices[1].position[1];
-    float Bz = vertices[1].position[2];
-
-    float Cx = vertices[2].position[0];
-    float Cy = vertices[2].position[1];
-    float Cz = vertices[2].position[2];
+    float Cx = vertices[2][0];
+    float Cy = vertices[2][1];
+    float Cz = vertices[2][2];
 
     float Px = x / (float)image->width;
     float Py = y / (float)image->height;
@@ -137,11 +131,19 @@ void boaster_single_raster(
             for (int i = 0; i < vertex_count; i += 3) {
                 float barycentrics[] = { 0, 0, 0 };
 
-                boaster_vertex_t *vertices =
-                    &((boaster_vertex_t*) vertex_buffer->data)[i];
+                /*
+                 * Position MUST be the first property, and it must consist of
+                 * at least 3 floats, so casting this to (float**) is safe,
+                 * unless validation is skipped with BOASTER_NO_VALIDATION
+                 */
+                void *vertices[] = {
+                    vertex_buffer->data + vertex_format->size * i,
+                    vertex_buffer->data + vertex_format->size * (i + 1),
+                    vertex_buffer->data + vertex_format->size * (i + 2)
+                };
 
                 if(boaster_point_in_vbuf_triangle(
-                    vertex_buffer->data,
+                    (float**) vertices,
                     x, y, i,
                     barycentrics,
                     image
@@ -193,11 +195,19 @@ void boaster_raster_runner(void *arg) {
 
                 float barycentrics[] = { 0, 0, 0 };
 
-                boaster_vertex_t *vertices =
-                    &((boaster_vertex_t*) vertex_buffer->data)[i];
+                /*
+                 * Position MUST be the first property, and it must consist of
+                 * at least 3 floats, so casting this to (float**) is safe,
+                 * unless validation is skipped with BOASTER_NO_VALIDATION
+                 */
+                void *vertices[] = {
+                    vertex_buffer->data + vertex_format->size * i,
+                    vertex_buffer->data + vertex_format->size * (i + 1),
+                    vertex_buffer->data + vertex_format->size * (i + 2)
+                };
 
                 if(boaster_point_in_vbuf_triangle(
-                    vertex_buffer->data,
+                    (float**) vertices,
                     x, y, i,
                     barycentrics,
                     image
@@ -261,7 +271,7 @@ void boaster_multi_raster(
     free(tasks);
 }
 
-void pixel_callback(boaster_vertex_t* vertices,
+void pixel_callback(void** vertices,
     size_t x, size_t y,
     float barycentrics[3],
     boaster_pixel_t* pixel,
@@ -276,7 +286,7 @@ void pixel_callback(boaster_vertex_t* vertices,
 
     for (int i = 0; i < format->property_count; ++i) {
         format->interpolators[i](
-            vertices,
+            *vertices,
             barycentrics,
             pixel_context->vertex_data,
             format->size,
@@ -368,12 +378,14 @@ boaster_error_t boaster_render(
     boaster_context_t *context,
     boaster_draw_call_t draw_call
     ) {
+    #ifndef BOASTER_NO_VALIDATE
     if (!context)
         return BOASTER_MISSING_CONTEXT;
 
     boaster_error_t error = boaster_validate_draw_call(draw_call);
     if (error != BOASTER_OK)
         return error;
+    #endif
 
     // Extract fields
     boaster_buffer_t* vertex_buffer = draw_call.vertex_buffer;

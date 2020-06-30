@@ -25,7 +25,7 @@ typedef struct {
     int num_threads;
 } boaster_config_t;
 
-typedef void (*boaster_pixel_callback_t)(boaster_vertex_t* vertices,
+typedef void (*boaster_pixel_callback_t)(void** vertices,
     size_t x, size_t y,
     float barycentrics[3],
     boaster_pixel_t *pixel,
