@@ -1,5 +1,5 @@
 #include "include/boaster/varray.h"
-#include "include/test/test.h"
+#include "include/testboat.h"
 
 int main() {
     test("Initialize should reset data",

@@ -1,5 +1,5 @@
-#ifndef TEST_TEST_H_
-#define TEST_TEST_H_
+#ifndef TESTBOAT_H_
+#define TESTBOAT_H_
 
 #include <stdio.h>
 
@@ -28,4 +28,4 @@ int test_summarize();
 }
 
 
-#endif  // TEST_TEST_H_
+#endif  // TESTBOAT_H_

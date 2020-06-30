@@ -1,6 +1,6 @@
 #include <string.h>
 #include "include/boaster/buffer.h"
-#include "include/test/test.h"
+#include "include/testboat.h"
 
 int main() {
     test("Create empty buffer",

@@ -1,6 +1,6 @@
 #include <string.h>
 #include "include/boastmath/matrix.h"
-#include "include/test/test.h"
+#include "include/testboat.h"
 #include "include/boastmath/vector.h"
 
 void vec4_dump(bm_vec4 v) {

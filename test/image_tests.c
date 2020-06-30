@@ -1,6 +1,6 @@
 #include "include/boaster/types.h"
 #include "include/boaster/image.h"
-#include "include/test/test.h"
+#include "include/testboat.h"
 
 int main() {
     boaster_format_t pixel_format;

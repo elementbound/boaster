@@ -1,4 +1,5 @@
-INCLUDE = -I.
+INCLUDE = -I. -Itestboat
+LDFLAGS = -L./testboat/lib
 
 all: test main glmain executor
 
@@ -59,7 +60,6 @@ compile: _ensure_out
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/property.c -o out/bin/boaster/property.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boaster/varray.c -o out/bin/boaster/varray.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/millitime.c -o out/bin/millitime.o
-	$(CC) $(INCLUDE) $(CFLAGS) -c src/test/test.c -o out/bin/test/test.o3
 
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastgl/boastgl.c -o out/bin/boastgl/boastgl.o
 
@@ -83,33 +83,35 @@ run: main
 	out/main
 
 test.buffer:
-	$(CC) $(INCLUDE) \
-		out/bin/test/test.o \
+	$(CC) $(INCLUDE) $(LDFLAGS) \
 		out/bin/boaster/buffer.o \
-		test/buffer_tests.c -o out/test/buffer_tests
+		test/buffer_tests.c \
+		-ltestboat \
+		-o out/test/buffer_tests
 
 test.image:
-	$(CC) $(INCLUDE) \
-		out/bin/test/test.o \
+	$(CC) $(INCLUDE) $(LDFLAGS) \
 		out/bin/boaster/format.o \
 		out/bin/boaster/interpolator.o \
 		out/bin/boaster/property.o \
 		out/bin/boaster/varray.o \
 		out/bin/boaster/image.o \
-		test/image_tests.c -o out/test/image_tests
+		test/image_tests.c \
+		-ltestboat \
+		-o out/test/image_tests
 
 test.format:
-	$(CC) $(INCLUDE) \
-		out/bin/test/test.o \
+	$(CC) $(INCLUDE) $(LDFLAGS) \
 		out/bin/boaster/interpolator.o \
 		out/bin/boaster/varray.o \
 		out/bin/boaster/format.o \
 		out/bin/boaster/property.o \
-		test/format_tests.c -o out/test/format_tests
+		test/format_tests.c \
+		-ltestboat \
+		-o out/test/format_tests
 
 test.vertex_shader:
-	$(CC) $(INCLUDE) \
-		out/bin/test/test.o \
+	$(CC) $(INCLUDE) $(LDFLAGS) \
 		out/bin/boaster/buffer.o \
 		out/bin/boaster/executor.o \
 		out/bin/boaster/image.o \
@@ -118,19 +120,21 @@ test.vertex_shader:
 		out/bin/boaster/varray.o \
 		out/bin/boaster/format.o \
 		out/bin/boaster/property.o \
-		-lm -lpthread \
-		test/vertex_shader_tests.c -o out/test/vertex_shader_tests
+		test/vertex_shader_tests.c \
+		-lm -lpthread -ltestboat \
+		-o out/test/vertex_shader_tests
 
 test.varray:
-	$(CC) $(INCLUDE) \
-		out/bin/test/test.o \
+	$(CC) $(INCLUDE) $(LDFLAGS) \
 		out/bin/boaster/varray.o \
-		test/varray_tests.c -o out/test/varray_tests
+		test/varray_tests.c \
+		-ltestboat -lm \
+		-o out/test/varray_tests
 
 test.matrix:
-	$(CC) $(INCLUDE) \
-		out/bin/test/test.o \
+	$(CC) $(INCLUDE) $(LDFLAGS) \
 		out/bin/boastmath/matrix.o \
 		out/bin/boastmath/vector.o \
-		-lm \
-		test/boastmath/matrix_tests.c -o out/test/boastmath/matrix_tests
+		test/boastmath/matrix_tests.c \
+		-ltestboat -lm \
+		-o out/test/boastmath/matrix_tests

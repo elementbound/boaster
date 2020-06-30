@@ -104,10 +104,10 @@ void pixel_shader(
 }
 
 int main() {
-    const size_t width = 320;
-    const size_t height = 320;
-    const float scale = 2;
-    const size_t target_fps = 1000;
+    const size_t width = 160;
+    const size_t height = 160;
+    const float scale = 4;
+    const size_t target_fps = 20;
     const double target_rest = 1000.0 / ((double)target_fps);
 
     double time_spent = 0;
