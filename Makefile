@@ -26,6 +26,7 @@ glmain: compile
 		out/bin/boaster/format.o \
 		out/bin/boaster/property.o \
 		out/bin/boaster/boaster.o \
+		out/bin/boastgl/boastgl.o \
 		out/bin/millitime.o \
 		-lm \
 		-lglfw3 -lGL -pthread -ldl -lrt -lXrandr -lX11 \
