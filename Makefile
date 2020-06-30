@@ -1,5 +1,5 @@
-INCLUDE = -I. -Itestboat -Iboaster
-LDFLAGS = -L./testboat/lib -L./boaster/lib
+INCLUDE = -I. -Itestboat -Iboaster -Iboastgl
+LDFLAGS = -L./testboat/lib -L./boaster/lib -L./boastgl/lib
 
 all: test main glmain executor
 
@@ -13,9 +13,8 @@ main: compile
 glmain: compile
 	$(CC) $(INCLUDE) $(LDFLAGS) \
 		out/bin/millitime.o \
-		out/bin/boastgl/boastgl.o \
 		src/glmain.c \
-		-lm -lboaster \
+		-lm -lboaster -lboastgl \
 		-lglfw3 -lGL -pthread -ldl -lrt -lXrandr -lX11 \
 		-o out/glmain
 
@@ -33,14 +32,11 @@ test.boastmath: compile test.matrix
 compile: _ensure_out
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/millitime.c -o out/bin/millitime.o
 
-	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastgl/boastgl.c -o out/bin/boastgl/boastgl.o
-
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastmath/vector.c -o out/bin/boastmath/vector.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/boastmath/matrix.c -o out/bin/boastmath/matrix.o
 
 _ensure_out:
 	mkdir -p out
-	mkdir -p out/bin/boastgl
 	mkdir -p out/bin/boastmath
 	mkdir -p out/test
 	mkdir -p out/test/boastmath
