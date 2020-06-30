@@ -1,7 +1,7 @@
 INCLUDE = -I. -Itestboat -Iboaster -Iboastgl
 LDFLAGS = -L./testboat/lib -L./boaster/lib -L./boastgl/lib -L./boastmath/lib
 
-all: test main glmain executor
+all: main glmain executor
 
 main: compile
 	$(CC) $(INCLUDE) $(LDFLAGS) \
@@ -29,6 +29,7 @@ compile: _ensure_out
 
 _ensure_out:
 	mkdir -p out
+	mkdir -p out/bin
 
 clean:
 	rm -rf out
