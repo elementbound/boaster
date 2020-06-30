@@ -1,7 +1,7 @@
 #include <time.h>
-#include "include/millitime.h"
+#include "include/boaster/millitime.h"
 
-double get_millitime() {
+double boaster_get_millitime() {
     struct timespec tp;
     clock_gettime(CLOCK_REALTIME, &tp);
 

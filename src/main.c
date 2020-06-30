@@ -6,7 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "include/boaster/boaster.h"
-#include "include/millitime.h"
+#include "include/boaster/millitime.h"
 
 double time_spent = 0;
 uint64_t vertices_rendered = 0;
@@ -181,9 +181,9 @@ int main() {
         boaster_image_fill(image, &background, sizeof(background));
         draw_call.uniform_data = &f;
 
-        double t_start = get_millitime();
+        double t_start = boaster_get_millitime();
         boaster_render(context, draw_call);
-        double t_end = get_millitime();
+        double t_end = boaster_get_millitime();
 
         dump_image(image);
 

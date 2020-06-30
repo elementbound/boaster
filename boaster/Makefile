@@ -11,6 +11,7 @@ boaster: compile
 		out/bin/format.o \
 		out/bin/image.o \
 		out/bin/interpolator.o \
+		out/bin/millitime.o \
 		out/bin/property.o \
 		out/bin/varray.o
 
@@ -24,6 +25,7 @@ compile: ensure_out
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/format.c -o out/bin/format.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/image.c -o out/bin/image.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/interpolator.c -o out/bin/interpolator.o
+	$(CC) $(INCLUDE) $(CFLAGS) -c src/millitime.c -o out/bin/millitime.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/property.c -o out/bin/property.o
 	$(CC) $(INCLUDE) $(CFLAGS) -c src/varray.c -o out/bin/varray.o
 

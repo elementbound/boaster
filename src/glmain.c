@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include "include/boaster/boaster.h"
 #include "include/boastgl/boastgl.h"
-#include "include/millitime.h"
+#include "include/boaster/millitime.h"
 
 int should_run = 1;
 
@@ -174,14 +174,14 @@ int main() {
 
         float f = i / (float)image->width;
 
-        double t_start = get_millitime();
+        double t_start = boaster_get_millitime();
         clear_screen();
         boaster_image_fill(image, &background, sizeof(background));
         draw_call.uniform_data = &f;
 
         boaster_render(context, draw_call);
         boastgl_window_push_image(window, image, scale);
-        double t_end = get_millitime();
+        double t_end = boaster_get_millitime();
         double frame_time = t_end - t_start;
 
         time_spent += t_end - t_start;
