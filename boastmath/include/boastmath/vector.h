@@ -7,6 +7,7 @@
 #define bm_spread_vec3(v) v[0], v[1], v[2]
 #define bm_spread_vec4(v) v[0], v[1], v[2], v[3]
 
+void bm_vecadd3f(bm_vec4 v, float f);
 float bm_vecmul(bm_vec4 v, float f);
 float bm_vecmul3(bm_vec4 v, float f);
 float bm_veclen3(bm_vec4 v);

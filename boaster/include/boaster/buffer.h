@@ -18,7 +18,8 @@ typedef struct {
 } boaster_buffer_t;
 
 boaster_buffer_t *boaster_buffer_create();
-void boaster_buffer_destroy(boaster_buffer_t*);
+void boaster_buffer_clear(boaster_buffer_t *buffer);
+void boaster_buffer_destroy(boaster_buffer_t *buffer);
 
 void boaster_buffer_ensure_capacity(boaster_buffer_t *buffer, size_t capacity);
 void boaster_buffer_push_bytes(boaster_buffer_t* buffer, const void* bytes,

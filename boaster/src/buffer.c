@@ -33,6 +33,14 @@ boaster_buffer_t *boaster_buffer_create() {
     return result;
 }
 
+void boaster_buffer_clear(boaster_buffer_t *buffer) {
+    free(buffer->data);
+
+    buffer->data = NULL;
+    buffer->__capacity = 0;
+    buffer->__size = 0;
+}
+
 void boaster_buffer_destroy(boaster_buffer_t *buffer) {
     free(buffer->data);
     free(buffer);

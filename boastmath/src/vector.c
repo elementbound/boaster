@@ -1,6 +1,12 @@
 #include <math.h>
 #include "include/boastmath/vector.h"
 
+void bm_vecadd3f(bm_vec4 v, float f) {
+    v[0] += f;
+    v[1] += f;
+    v[2] += f;
+}
+
 float bm_vecmul(bm_vec4 v, float f) {
     v[0] *= f;
     v[1] *= f;
