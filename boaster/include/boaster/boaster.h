@@ -28,7 +28,7 @@ typedef struct {
 typedef void (*boaster_pixel_callback_t)(void** vertices,
     size_t x, size_t y,
     float barycentrics[3],
-    boaster_pixel_t *pixel,
+    void *pixel,
     void *custom_data);
 
 typedef enum {

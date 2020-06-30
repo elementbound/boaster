@@ -148,8 +148,7 @@ void boaster_single_raster(
                     barycentrics,
                     image
                 )) {
-                    boaster_pixel_t* pixel =
-                        (boaster_pixel_t*) boaster_image_get_pixel(image, x, y);
+                    void* pixel = boaster_image_get_pixel(image, x, y);
 
                     callback(vertices, x, y, barycentrics, pixel,
                         pixel_context);
@@ -212,8 +211,7 @@ void boaster_raster_runner(void *arg) {
                     barycentrics,
                     image
                 )) {
-                    boaster_pixel_t* pixel =
-                        (boaster_pixel_t*) boaster_image_get_pixel(image, x, y);
+                    void* pixel = boaster_image_get_pixel(image, x, y);
 
                     callback(vertices, x, y, barycentrics, pixel,
                         &pixel_context);
@@ -274,7 +272,7 @@ void boaster_multi_raster(
 void pixel_callback(void** vertices,
     size_t x, size_t y,
     float barycentrics[3],
-    boaster_pixel_t* pixel,
+    void* pixel,
     void *custom_data) {
 
     boaster_pixel_context_t *pixel_context =
