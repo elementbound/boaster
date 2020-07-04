@@ -1,25 +1,31 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/sysinfo.h>
 #include "include/boaster/boaster.h"
 #include "include/boaster/buffer.h"
 #include "include/boaster/executor.h"
+#include "include/boaster/format.h"
+#include "include/boaster/types.h"
 
 typedef struct {
     boaster_draw_call_t *draw_call;
     void *vertex_data;
+    void *pixel_data;
+    boaster_property_t *depth_property;
+    boaster_format_t* image_format;
 } boaster_pixel_context_t;
 
 typedef void(*boaster_rasterizer_t)(
     boaster_context_t *boaster_context,
+    boaster_draw_call_t draw_call,
     boaster_buffer_t *vertex_buffer,
     boaster_format_t *vertex_format,
     boaster_image_t *image,
-    boaster_pixel_callback_t callback,
-    boaster_pixel_context_t *pixel_context);
+    boaster_pixel_callback_t callback);
 
 struct boaster_context_t {
     boaster_rasterizer_t raster_function;
@@ -126,81 +132,27 @@ int boaster_point_in_vbuf_triangle(
 
 void boaster_single_raster(
     boaster_context_t *boaster_context,
+    boaster_draw_call_t draw_call,
     boaster_buffer_t *vertex_buffer,
     boaster_format_t *vertex_format,
     boaster_image_t *image,
-    boaster_pixel_callback_t callback,
-    boaster_pixel_context_t *pixel_context) {
+    boaster_pixel_callback_t callback) {
 
     int vertex_size = vertex_format->size;
     int vertex_count = vertex_buffer->__size / vertex_size;
+    int pixel_size = image->format->size;
+
+    boaster_pixel_context_t pixel_context = {
+        .draw_call = &draw_call,
+        .vertex_data = malloc(vertex_size),
+        .pixel_data = malloc(pixel_size),
+        .depth_property = boaster_format_get_property(image->format, "depth"),
+        .image_format = image->format
+    };
 
     for (int y = 0; y < image->height; ++y) {
         for (int x = 0; x < image->width; ++x) {
             for (int i = 0; i < vertex_count; i += 3) {
-                float barycentrics[] = { 0, 0, 0 };
-
-                /*
-                 * Position MUST be the first property, and it must consist of
-                 * at least 3 floats, so casting this to (float**) is safe,
-                 * unless validation is skipped with BOASTER_NO_VALIDATION
-                 */
-                void *vertices[] = {
-                    vertex_buffer->data + vertex_format->size * i,
-                    vertex_buffer->data + vertex_format->size * (i + 1),
-                    vertex_buffer->data + vertex_format->size * (i + 2)
-                };
-
-                if(boaster_point_in_vbuf_triangle(
-                    (float**) vertices,
-                    x, y, i,
-                    barycentrics,
-                    image
-                )) {
-                    void* pixel = boaster_image_get_pixel(image, x, y);
-
-                    callback(vertices, x, y, barycentrics, pixel,
-                        pixel_context);
-                }
-            }
-        }
-    }
-}
-
-typedef struct {
-    int x;
-    int y;
-    int width;
-    int height;
-
-    boaster_buffer_t *vertex_buffer;
-    boaster_format_t *vertex_format;
-    boaster_image_t *image;
-    boaster_pixel_callback_t callback;
-    boaster_pixel_context_t *pixel_context;
-} boaster_raster_task_t;
-
-void boaster_raster_runner(void *arg) {
-    boaster_raster_task_t *task =
-        (boaster_raster_task_t*) arg;
-
-    boaster_format_t *vertex_format = task->vertex_format;
-    boaster_buffer_t *vertex_buffer = task->vertex_buffer;
-    boaster_image_t *image = task->image;
-    boaster_pixel_callback_t callback = task->callback;
-    boaster_pixel_context_t *in_pixel_context = task->pixel_context;
-
-    boaster_pixel_context_t pixel_context;
-    memcpy(&pixel_context, in_pixel_context, sizeof(boaster_pixel_context_t));
-    pixel_context.vertex_data = malloc(vertex_format->size);
-
-    int vertex_size = vertex_format->size;
-    int vertex_count = vertex_buffer->__size / vertex_size;
-
-    for (int y = task->y; y < task->y + task->height; ++y) {
-        for (int x = task->x; x < task->x + task->width; ++x) {
-            for (int i = 0; i < vertex_count; i += 3) {
-
                 float barycentrics[] = { 0, 0, 0 };
 
                 /*
@@ -230,15 +182,86 @@ void boaster_raster_runner(void *arg) {
     }
 
     free(pixel_context.vertex_data);
+    free(pixel_context.pixel_data);
+}
+
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+
+    boaster_draw_call_t *draw_call;
+    boaster_buffer_t *vertex_buffer;
+    boaster_format_t *vertex_format;
+    boaster_image_t *image;
+    boaster_pixel_callback_t callback;
+} boaster_raster_task_t;
+
+void boaster_raster_runner(void *arg) {
+    boaster_raster_task_t *task =
+        (boaster_raster_task_t*) arg;
+
+    boaster_format_t *vertex_format = task->vertex_format;
+    boaster_buffer_t *vertex_buffer = task->vertex_buffer;
+    boaster_image_t *image = task->image;
+    boaster_pixel_callback_t callback = task->callback;
+
+    int vertex_size = vertex_format->size;
+    int vertex_count = vertex_buffer->__size / vertex_size;
+    int pixel_size = image->format->size;
+
+    boaster_pixel_context_t pixel_context = {
+        .draw_call = task->draw_call,
+        .vertex_data = malloc(vertex_size),
+        .pixel_data = malloc(pixel_size),
+        .depth_property =
+            boaster_format_get_property(image->format, "depth"),
+        .image_format = image->format
+    };
+
+    for (int y = task->y; y < task->y + task->height; ++y) {
+        for (int x = task->x; x < task->x + task->width; ++x) {
+            for (int i = 0; i < vertex_count; i += 3) {
+                float barycentrics[] = { 0, 0, 0 };
+
+                /*
+                 * Position MUST be the first property, and it must consist of
+                 * at least 3 floats, so casting this to (float**) is safe,
+                 * unless validation is skipped with BOASTER_NO_VALIDATION
+                 */
+                void *vertices[] = {
+                    vertex_buffer->data + vertex_format->size * i,
+                    vertex_buffer->data + vertex_format->size * (i + 1),
+                    vertex_buffer->data + vertex_format->size * (i + 2)
+                };
+
+                if(boaster_point_in_vbuf_triangle(
+                    (float**) vertices,
+                    x, y, i,
+                    barycentrics,
+                    image
+                )) {
+                    void* pixel = boaster_image_get_pixel(image, x, y);
+
+                    callback(vertices, x, y, barycentrics, pixel,
+                        &pixel_context);
+                }
+            }
+        }
+    }
+
+    free(pixel_context.vertex_data);
+    free(pixel_context.pixel_data);
 }
 
 void boaster_multi_raster(
     boaster_context_t *boaster_context,
+    boaster_draw_call_t draw_call,
     boaster_buffer_t *vertex_buffer,
     boaster_format_t *vertex_format,
     boaster_image_t *image,
-    boaster_pixel_callback_t callback,
-    boaster_pixel_context_t *pixel_context) {
+    boaster_pixel_callback_t callback) {
 
     int num_threads = boaster_context->num_threads;
 
@@ -260,11 +283,11 @@ void boaster_multi_raster(
             tasks[i].width = fmin(image->width - x, section_width);
             tasks[i].height = fmin(image->height - y, section_height);
 
+            tasks[i].draw_call = &draw_call;
             tasks[i].vertex_buffer = vertex_buffer;
             tasks[i].vertex_format = vertex_format;
             tasks[i].image = image;
             tasks[i].callback = callback;
-            tasks[i].pixel_context = pixel_context;
 
             boaster_executor_push_task(executor, boaster_raster_runner,
                 &tasks[i]);
@@ -290,6 +313,10 @@ void pixel_callback(void** vertices,
         pixel_context->draw_call;
     boaster_format_t* format =
         draw_call->transform_format;
+    boaster_format_t* image_format =
+        pixel_context->image_format;
+    boaster_property_t *depth_property =
+        pixel_context->depth_property;
 
     for (int i = 0; i < format->property_count; ++i) {
         format->interpolators[i](
@@ -307,8 +334,34 @@ void pixel_callback(void** vertices,
         && fabs(position[1]) < 1.0
         && fabs(position[2]) < 1.0
     ) {
-        draw_call->pixel_shader(pixel_context->vertex_data, pixel,
+        int copy_pixel = 1;
+
+        draw_call->pixel_shader(
+            pixel_context->vertex_data, pixel_context->pixel_data,
             draw_call->uniform_data, format);
+
+        if (draw_call->enable_depth_test) {
+            assert(depth_property->size == sizeof(uint32_t));
+
+            const uint32_t max_depth = (1u << 31) - 1;
+            uint32_t current_z =
+                *(uint32_t*) boaster_property_get_pointer(depth_property,
+                    pixel);
+            uint32_t new_z = (1.0 + position[2]) / 2.0 * max_depth;
+
+            if (new_z < current_z) {
+                uint32_t *out_z =
+                    (uint32_t*) boaster_property_get_pointer(depth_property,
+                        pixel_context->pixel_data);
+
+                *out_z = new_z;
+            } else {
+                copy_pixel = 0;
+            }
+        }
+
+        if (copy_pixel)
+            memcpy(pixel, pixel_context->pixel_data, image_format->size);
     }
 }
 
@@ -413,6 +466,13 @@ boaster_error_t boaster_render(
     void* uniform_data = draw_call.uniform_data;
     boaster_image_t* image = draw_call.target_image;
 
+    boaster_format_t *image_format = image->format;
+    boaster_property_t *depth_property =
+        boaster_format_get_property(image_format, "depth");
+
+    if (draw_call.enable_depth_test && !depth_property)
+        draw_call.enable_depth_test = 0;
+
     // Vertices must come in multiples of three, forming triangles
     size_t in_vertex_size = input_format->size;
     size_t vertex_count = vertex_buffer->__size / in_vertex_size;
@@ -427,21 +487,16 @@ boaster_error_t boaster_render(
     boaster_run_vertex_shader(draw_call, vertex_count, vertex_out);
 
     // Rasterize output triangles
-    boaster_pixel_context_t pixel_context;
-    pixel_context.draw_call = &draw_call;
-    pixel_context.vertex_data = malloc(out_vertex_size);
-
     context->raster_function(
         context,
+        draw_call,
         vertex_out,
         transform_format,
         image,
-        pixel_callback,
-        &pixel_context
+        pixel_callback
     );
 
     // Cleanup
-    free(pixel_context.vertex_data);
     boaster_buffer_destroy(vertex_out);
 
     return BOASTER_OK;

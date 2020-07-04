@@ -21,6 +21,8 @@ typedef struct {
     boaster_format_t* input_format;
     boaster_format_t* transform_format;
 
+    int enable_depth_test;
+
     boaster_image_t* target_image;
 } boaster_draw_call_t;
 
