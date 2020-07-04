@@ -135,14 +135,17 @@ int main() {
 
     boaster_image_t *image = boaster_image_create(&pixel_format, width, height);
 
-    boaster_vertex_t triangle_vertices[] = {
-        { .position = { 0.2, 0.2, 0.0, 0.f }, .color = { 0.f, 0.f, 0.f, 1.f } },
-        { .position = { 0.8, 0.2, 0.0, 0.f }, .color = { 0.5, 1.f, 0.f, 1.f } },
-        { .position = { 0.2, 0.8, 0.0, 0.f }, .color = { 1.0, 1.f, 0.f, 1.f } },
+    const float min = -0.6;
+    const float max =  0.6;
 
-        { .position = { 0.2, 0.8, 0.0, 0.f }, .color = { 1.0, 1.f, 0.f, 1.f } },
-        { .position = { 0.8, 0.2, 0.0, 0.f }, .color = { 0.5, 1.f, 0.f, 1.f } },
-        { .position = { 0.8, 0.8, 0.0, 0.f }, .color = { 1.f, 1.f, 0.f, 1.f } },
+    boaster_vertex_t triangle_vertices[] = {
+        { .position = { min, min, 0.0, 1.f }, .color = { 0.f, 0.f, 0.f, 1.f } },
+        { .position = { max, min, 0.0, 1.f }, .color = { 0.5, 1.f, 0.f, 1.f } },
+        { .position = { min, max, 0.0, 1.f }, .color = { 1.0, 1.f, 0.f, 1.f } },
+
+        { .position = { min, max, 0.0, 1.f }, .color = { 1.0, 1.f, 0.f, 1.f } },
+        { .position = { max, min, 0.0, 1.f }, .color = { 0.5, 1.f, 0.f, 1.f } },
+        { .position = { max, max, 0.0, 1.f }, .color = { 1.f, 1.f, 0.f, 1.f } },
     };
 
     boaster_format_t format;

@@ -61,9 +61,6 @@ void pass_through_vertex_shader(void* v_vertex, void* v_out, void* v_uniforms,
     out_position[0] *= scale;
     out_position[1] *= scale;
 
-    out_position[0] = (1.0 + out_position[0]) / 2.0;
-    out_position[1] = (1.0 + out_position[1]) / 2.0;
-
     out_position[2] = in_position[2];
     out_position[3] = in_position[3];
 
@@ -137,9 +134,9 @@ int main() {
     boaster_image_t *image = boaster_image_create(&pixel_format, width, height);
 
     boaster_vertex_t triangle_vertices[] = {
-        { .position = {-1.0,  1.0, 0.0, 0.f}, .color = {1.0, 0.0, 0.0, 1.f} },
-        { .position = { 0.0, -1.0, 0.0, 0.f}, .color = {0.0, 1.0, 0.0, 1.f} },
-        { .position = { 1.0,  1.0, 0.0, 0.f}, .color = {0.0, 0.0, 1.0, 1.f} }
+        { .position = {-1.0,  1.0, 0.0, 1.f}, .color = {1.0, 0.0, 0.0, 1.f} },
+        { .position = { 0.0, -1.0, 0.0, 1.f}, .color = {0.0, 1.0, 0.0, 1.f} },
+        { .position = { 1.0,  1.0, 0.0, 1.f}, .color = {0.0, 0.0, 1.0, 1.f} }
     };
 
     boaster_format_t format;

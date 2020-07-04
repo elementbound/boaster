@@ -44,6 +44,18 @@ void boaster_run_vertex_shader(boaster_draw_call_t draw_call,
 
         vertex_shader(input_vertex, output_vertex, uniform_data,
             input_format, transform_format);
+
+        float *position = (float*) output_vertex;
+        position[0] /= position[3];
+        position[1] /= position[3];
+        position[2] /= position[3];
+        /* Leave W as is, for potential debug purposes */
+        // position[3] = 1.0;
+
+        #ifdef BOASTER_DUMP_VERTEX_SHADER_OUTPUT
+        printf("[%f %f %f][%f]\n",
+            position[0], position[1], position[2], position[3]);
+        #endif
     }
 }
 
@@ -289,8 +301,15 @@ void pixel_callback(void** vertices,
         );
     }
 
-    draw_call->pixel_shader(pixel_context->vertex_data, pixel,
-        draw_call->uniform_data, format);
+    float *position = (float*) pixel_context->vertex_data;
+
+    if (fabs(position[0]) < 1.0
+        && fabs(position[1]) < 1.0
+        && fabs(position[2]) < 1.0
+    ) {
+        draw_call->pixel_shader(pixel_context->vertex_data, pixel,
+            draw_call->uniform_data, format);
+    }
 }
 
 boaster_context_t *boaster_context_create(boaster_config_t config) {
