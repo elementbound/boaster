@@ -3,6 +3,12 @@ LDFLAGS = -L./testboat/lib -L./boaster/lib -L./boastgl/lib -L./boastmath/lib
 
 samples: main glmain executor
 
+modules:
+	$(MAKE) -C testboat
+	$(MAKE) -C boaster
+	$(MAKE) -C boastgl
+	$(MAKE) -C boastmath
+
 main: ensure_out
 	$(CC) $(INCLUDE) $(LDFLAGS) \
 		samples/main.c \
