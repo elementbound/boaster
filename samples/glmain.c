@@ -177,7 +177,7 @@ int main() {
         draw_call.uniform_data = &f;
 
         boaster_render(context, draw_call);
-        boastgl_window_push_image(window, image, scale);
+        boastgl_window_push_image(window, image, boastgl_byte3_codec, scale);
         double t_end = boaster_get_millitime();
         double frame_time = t_end - t_start;
 

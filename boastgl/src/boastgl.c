@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <GLFW/glfw3.h>
@@ -76,6 +77,7 @@ void boastgl_window_destroy(boastgl_window_t *window) {
 void boastgl_window_push_image(
     boastgl_window_t *window,
     boaster_image_t *image,
+    boastgl_codec_t codec,
     float scale
 ) {
     assert(window);
@@ -92,18 +94,14 @@ void boastgl_window_push_image(
     size_t out_width = image->width * scale;
     size_t out_height = image->height * scale;
 
-    // TODO(elementbound): Codec support for custom format conversion
     for (int y = 0; y < image->height; ++y) {
         for (int x = 0; x < image->width; ++x) {
             uint8_t* out =
                 buffer->data + ((y * image->width) + x) * 3 * sizeof(uint8_t);
 
-            boaster_pixel_t *in =
-                (boaster_pixel_t*) boaster_image_get_pixel(image, x, y);
+            void *in = boaster_image_get_pixel(image, x, y);
 
-            out[0] = in->color[0] * in->color[3] / 255;
-            out[1] = in->color[1] * in->color[3] / 255;
-            out[2] = in->color[2] * in->color[3] / 255;
+            codec(in, out, image->format);
         }
     }
 
@@ -146,4 +144,32 @@ int boastgl_window_is_open(boastgl_window_t *window) {
         return 0;
 
     return window->is_open;
+}
+
+#define fsat(x) fminf(0.0, fmaxf(1.0, (x)))
+
+void boastgl_float3_codec(
+    void *in_pixel,
+    uint8_t *out_pixel,
+    boaster_format_t *image_format
+) {
+    float *in = (float*) in_pixel;
+
+    out_pixel[0] = fsat(in[0]) * 255;
+    out_pixel[1] = fsat(in[1]) * 255;
+    out_pixel[2] = fsat(in[2]) * 255;
+}
+
+#undef fsat
+
+void boastgl_byte3_codec(
+    void *in_pixel,
+    uint8_t *out_pixel,
+    boaster_format_t *image_format
+) {
+    uint8_t *in = (uint8_t*) in_pixel;
+
+    out_pixel[0] = in[0];
+    out_pixel[1] = in[1];
+    out_pixel[2] = in[2];
 }
