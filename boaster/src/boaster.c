@@ -354,10 +354,13 @@ int boaster_format_check_position(boaster_format_t *format) {
     if (position_index != 0)
         return 0;
 
+    if (position->offset != 0)
+        return 0;
+
     if (position->component_size != sizeof(float))
         return 0;
 
-    if (position->component_count < 3)
+    if (position->component_count < 4)
         return 0;
 
     return 1;
