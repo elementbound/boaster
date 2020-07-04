@@ -60,21 +60,18 @@ int boaster_check_point_in_triangle(
 
     float v0x = Cx - Ax;
     float v0y = Cy - Ay;
-    float v0z = Cz - Az;
 
     float v1x = Bx - Ax;
     float v1y = By - Ay;
-    float v1z = Bz - Az;
 
     float v2x = Px - Ax;
     float v2y = Py - Ay;
-    float v2z = Pz - Az;
 
-    float dot00 = v0x * v0x + v0y * v0y + v0z * v0z;
-    float dot01 = v0x * v1x + v0y * v1y + v0z * v1z;
-    float dot02 = v0x * v2x + v0y * v2y + v0z * v2z;
-    float dot11 = v1x * v1x + v1y * v1y + v1z * v1z;
-    float dot12 = v1x * v2x + v1y * v2y + v1z * v2z;
+    float dot00 = v0x * v0x + v0y * v0y;
+    float dot01 = v0x * v1x + v0y * v1y;
+    float dot02 = v0x * v2x + v0y * v2y;
+    float dot11 = v1x * v1x + v1y * v1y;
+    float dot12 = v1x * v2x + v1y * v2y;
 
     float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
     barycentrics[0] = (dot11 * dot02 - dot01 * dot12) * invDenom;
@@ -104,9 +101,9 @@ int boaster_point_in_vbuf_triangle(
     float Cy = vertices[2][1];
     float Cz = vertices[2][2];
 
-    float Px = x / (float)image->width;
-    float Py = y / (float)image->height;
-    float Pz = 0.5f;
+    float Px = -1.0 + 2.0 * x / (float)image->width;
+    float Py = -1.0 + 2.0 * y / (float)image->height;
+    float Pz = 1.0;
 
     return boaster_check_point_in_triangle(
         Ax, Ay, Az, Bx, By, Bz, Cx, Cy, Cz,
