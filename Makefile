@@ -1,7 +1,9 @@
 INCLUDE = -I. -Itestboat -Iboaster -Iboastgl
 LDFLAGS = -L./testboat/lib -L./boaster/lib -L./boastgl/lib -L./boastmath/lib
 
-samples: main glmain executor
+all: modules samples
+
+samples: main glmain executor parrotdemo
 
 modules:
 	$(MAKE) -C testboat
@@ -22,6 +24,9 @@ glmain: ensure_out
 		-lglfw3 -lGL -pthread -ldl -lrt -lXrandr -lX11 \
 		-o out/glmain
 
+parrotdemo:
+	$(MAKE) -C parrotdemo
+
 executor: ensure_out
 	$(CC) $(INCLUDE) $(LDFLAGS) \
 		samples/executor.c \
@@ -33,3 +38,6 @@ ensure_out:
 
 clean:
 	rm -rf out
+
+cleanall:
+	rm -rf **/out
