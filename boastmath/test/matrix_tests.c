@@ -28,14 +28,17 @@ void test_mat4_x_vec4() {
     };
 
     bm_vec4 vec = {
-        1.0, 2.0, 3.0, 4.0
+        1.0,
+        2.0,
+        3.0,
+        4.0
     };
 
     bm_vec4 expected = {
-        0.5 + 2.0,
-        1.0 + 2.0 + 3.0,
-        1.5 + 2.0,
-        2.0 + 2.0
+        0.5 + 2.0 + 4.5 + 8.0,
+        1.0 + 2.0 + 3.0 + 4.0,
+        0.0 + 2.0 + 0.0 + 0.0,
+        0.0 + 0.0 + 0.0 + 0.0
     };
 
     bm_vec4 actual;
@@ -98,15 +101,21 @@ void test_mat4_x_identity() {
     mat4_dump(expected);
 }
 
-void test_lookat_in_front () {
+void test_lookat () {
     // Given
     bm_vec4 from = {1.0, 0.0, 0.0, 1.0};
-    bm_vec4 at = {2.0, 0.0, 0.0, 1.0};
+    bm_vec4 at = {1.0, 1.0, 0.0, 1.0};
     bm_vec4 up = {0.0, 0.0, 1.0, 1.0};
 
-    bm_vec4 v = {2.0, 0.0, 0.0, 1.0};
-    bm_vec4 expected = {0.0, 0.0, 1.0, 1.0};
-    bm_vec4 actual;
+    bm_vec4 front = {1.0, 2.0, 0.0, 1.0};
+    bm_vec4 left = {-1.0, 0.0, 0.0, 1.0};
+    bm_vec4 top = {1.0, 0.0, 1.0, 1.0};
+
+    bm_vec4 expectedFront = {0.0, 0.0, -2.0, 1.0};
+    bm_vec4 expectedLeft = {-2.0, 0.0, 0.0, 1.0};
+    bm_vec4 expectedUp = {0.0, 1.0, 0.0, 1.0};
+
+    bm_vec4 actualFront, actualLeft, actualUp;
 
     // When
     bm_mat4 mat;
@@ -116,23 +125,40 @@ void test_lookat_in_front () {
         bm_spread_vec3(up)
     );
 
-    bm_mattrans(actual, mat, v);
+    bm_mattrans(actualFront, mat, front);
+    bm_mattrans(actualLeft, mat, left);
+    bm_mattrans(actualUp, mat, top);
 
     // Then
-    test_assert(memcmp(expected, actual, sizeof(bm_vec4)) == 0,
-        "Result vector should be expected");
+    test_assert(memcmp(expectedFront, actualFront, sizeof(bm_vec4)) == 0,
+        "Front result should be expected");
+    test_assert(memcmp(expectedLeft, actualLeft, sizeof(bm_vec4)) == 0,
+        "Left result should be expected");
+    test_assert(memcmp(expectedUp, actualUp, sizeof(bm_vec4)) == 0,
+        "Up result should be expected");
 
     printf("Matrix:\n");
     mat4_dump(mat);
 
-    printf("Transform: ");
-    vec4_dump(v);
+    printf("Camera: ");
+    vec4_dump(from);
+    vec4_dump(at);
+    vec4_dump(up);
+
+    printf("\nTransform: ");
+    vec4_dump(front);
+    vec4_dump(left);
+    vec4_dump(top);
 
     printf("\nActual: ");
-    vec4_dump(actual);
-    
+    vec4_dump(actualFront);
+    vec4_dump(actualLeft);
+    vec4_dump(actualUp);
+
     printf("\nExpected: ");
-    vec4_dump(expected);
+    vec4_dump(expectedFront);
+    vec4_dump(expectedLeft);
+    vec4_dump(expectedUp);
     printf("\n");
 }
 
@@ -146,7 +172,7 @@ int main() {
     );
 
     test("lookat front",
-        test_lookat_in_front();
+        test_lookat();
     );
 
     return test_summarize();

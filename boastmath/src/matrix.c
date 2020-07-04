@@ -56,13 +56,13 @@ void bm_matmul (bm_mat4 result, bm_mat4 a, bm_mat4 b) {
 }
 
 void bm_mattrans (bm_vec4 result, bm_mat4 a, bm_vec4 v) {
-    RV(0) = V(0) * A(0, 0) + V(1) * A(1, 0) + V(2) * A(2, 0) + V(3) * A(3, 0);
-    RV(1) = V(0) * A(0, 1) + V(1) * A(1, 1) + V(2) * A(2, 1) + V(3) * A(3, 1);
-    RV(2) = V(0) * A(0, 2) + V(1) * A(1, 2) + V(2) * A(2, 2) + V(3) * A(3, 2);
-    RV(3) = V(0) * A(0, 3) + V(1) * A(1, 3) + V(2) * A(2, 3) + V(3) * A(3, 3);
+    RV(0) = V(0) * A(0, 0) + V(1) * A(0, 1) + V(2) * A(0, 2) + V(3) * A(0, 3);
+    RV(1) = V(0) * A(1, 0) + V(1) * A(1, 1) + V(2) * A(1, 2) + V(3) * A(1, 3);
+    RV(2) = V(0) * A(2, 0) + V(1) * A(2, 1) + V(2) * A(2, 2) + V(3) * A(2, 3);
+    RV(3) = V(0) * A(3, 0) + V(1) * A(3, 1) + V(2) * A(3, 2) + V(3) * A(3, 3);
 }
 
-// See: https://www.3dgep.com/understanding-the-view-matrix/#The_View_Matrix
+// See: http://songho.ca/opengl/gl_camera.html#lookat
 void bm_mat_lookat (
     bm_mat4 result,
     float fromX, float fromY, float fromZ,
@@ -73,37 +73,33 @@ void bm_mat_lookat (
     bm_vec4 at = {atX, atY, atZ, 0.0};
     bm_vec4 up = {upX, upY, upZ, 0.0};
 
-    bm_vec4 zaxis = {fromX - atX, fromY - atY, fromZ - atZ, 0.0};
-    bm_vec4 xaxis;
-    bm_vec4 yaxis;
+    bm_vec4 forward = { fromX - atX, fromY - atY, fromZ - atZ, 0.0 };
+    bm_vecnormalize(forward);
 
-    bm_vecnormalize(zaxis);
+    bm_vec4 left;
+    bm_veccross(left, up, forward);
+    bm_vecnormalize(left);
 
-    bm_veccross(xaxis, zaxis, up);
-    bm_vecnormalize(xaxis);
+    bm_veccross(up, forward, left);
 
-    bm_veccross(yaxis, zaxis, xaxis);
+    R(0, 0) = left[0];
+    R(0, 1) = left[1];
+    R(0, 2) = left[2];
+    R(0, 3) = -left[0] * fromX - left[1] * fromY - left[2] * fromZ;
 
-    bm_vecmul(zaxis, -1.0);
+    R(1, 0) = up[0];
+    R(1, 1) = up[1];
+    R(1, 2) = up[2];
+    R(1, 3) = -up[0] * fromX - up[1] * fromY - up[2] * fromZ;
 
-    R(0, 0) = xaxis[0];
-    R(0, 1) = yaxis[0];
-    R(0, 2) = zaxis[0];
-    R(0, 3) = 0.0;
+    R(2, 0) = forward[0];
+    R(2, 1) = forward[1];
+    R(2, 2) = forward[2];
+    R(2, 3) = -forward[0] * fromX - forward[1] * fromY - forward[2] * fromZ;
 
-    R(1, 0) = xaxis[1];
-    R(1, 1) = yaxis[1];
-    R(1, 2) = zaxis[1];
-    R(1, 3) = 0.0;
-
-    R(2, 0) = xaxis[2];
-    R(2, 1) = yaxis[2];
-    R(2, 2) = zaxis[2];
-    R(2, 3) = 0.0;
-
-    R(3, 0) = -bm_vecdot3(xaxis, from);
-    R(3, 1) = -bm_vecdot3(yaxis, from);
-    R(3, 2) = -bm_vecdot3(zaxis, from);
+    R(3, 0) = 0.0;
+    R(3, 1) = 0.0;
+    R(3, 2) = 0.0;
     R(3, 3) = 1.0;
 }
 
